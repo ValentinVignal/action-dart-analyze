@@ -3,7 +3,7 @@ module.exports =
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 875:
+/***/ 351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -16,7 +16,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(632);
+const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
  *
@@ -88,7 +88,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 752:
+/***/ 186:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -109,9 +109,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __nccwpck_require__(875);
-const file_command_1 = __nccwpck_require__(320);
-const utils_1 = __nccwpck_require__(632);
+const command_1 = __nccwpck_require__(351);
+const file_command_1 = __nccwpck_require__(717);
+const utils_1 = __nccwpck_require__(278);
 const os = __importStar(__nccwpck_require__(87));
 const path = __importStar(__nccwpck_require__(622));
 /**
@@ -332,7 +332,7 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 320:
+/***/ 717:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -349,7 +349,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(747));
 const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(632);
+const utils_1 = __nccwpck_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -367,7 +367,7 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 632:
+/***/ 278:
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -392,7 +392,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 961:
+/***/ 514:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -413,7 +413,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tr = __importStar(__nccwpck_require__(863));
+const tr = __importStar(__nccwpck_require__(159));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -442,7 +442,7 @@ exports.exec = exec;
 
 /***/ }),
 
-/***/ 863:
+/***/ 159:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -467,8 +467,8 @@ const os = __importStar(__nccwpck_require__(87));
 const events = __importStar(__nccwpck_require__(614));
 const child = __importStar(__nccwpck_require__(129));
 const path = __importStar(__nccwpck_require__(622));
-const io = __importStar(__nccwpck_require__(821));
-const ioUtil = __importStar(__nccwpck_require__(579));
+const io = __importStar(__nccwpck_require__(436));
+const ioUtil = __importStar(__nccwpck_require__(962));
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
 /*
@@ -1048,7 +1048,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 579:
+/***/ 962:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -1249,7 +1249,7 @@ function isUnixExecutable(stats) {
 
 /***/ }),
 
-/***/ 821:
+/***/ 436:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -1266,7 +1266,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const childProcess = __nccwpck_require__(129);
 const path = __nccwpck_require__(622);
 const util_1 = __nccwpck_require__(669);
-const ioUtil = __nccwpck_require__(579);
+const ioUtil = __nccwpck_require__(962);
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -1545,10 +1545,29 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
-/***/ 998:
+/***/ 176:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1558,41 +1577,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
-};
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.analyze = void 0;
-var exec = __nccwpck_require__(961);
+const exec = __importStar(__nccwpck_require__(514));
 var LogType;
 (function (LogType) {
     LogType["Info"] = "info";
@@ -1600,78 +1587,67 @@ var LogType;
     LogType["Error"] = "error";
 })(LogType || (LogType = {}));
 function analyze(workingDirectory) {
-    return __awaiter(this, void 0, void 0, function () {
-        var outputs, errOutputs, options, args, _1, errorCount, warningCount, infoCount, lines, errLines, delimiter, _i, _a, line, lineData, logType, lints, location_1, lintMessage, _b, file, lineNumber, columnNumber, lintName, lintNameLowerCase, url, message;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    outputs = '';
-                    errOutputs = '';
-                    options = { cwd: workingDirectory };
-                    options.listeners = {
-                        stdout: function (data) {
-                            outputs += data.toString();
-                        },
-                        stderr: function (data) {
-                            errOutputs += data.toString();
-                        }
-                    };
-                    args = [workingDirectory];
-                    _c.label = 1;
-                case 1:
-                    _c.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, exec.exec('dart analyze', args, options)];
-                case 2:
-                    _c.sent();
-                    return [3 /*break*/, 4];
-                case 3:
-                    _1 = _c.sent();
-                    return [3 /*break*/, 4];
-                case 4:
-                    errorCount = 0;
-                    warningCount = 0;
-                    infoCount = 0;
-                    lines = outputs.trim().split(/\r?\n/);
-                    errLines = errOutputs.trim().split(/\r?\n/);
-                    delimiter = '-';
-                    for (_i = 0, _a = __spreadArray(__spreadArray([], lines), errLines); _i < _a.length; _i++) {
-                        line = _a[_i];
-                        if (!line.includes(delimiter)) {
-                            continue;
-                        }
-                        try {
-                            lineData = line.split(delimiter);
-                            logType = lineData[0].trim();
-                            lints = lineData[1].trim().split(' at ');
-                            location_1 = lints.pop().trim();
-                            lintMessage = lints.join(' at ').trim();
-                            _b = location_1.split(':'), file = _b[0], lineNumber = _b[1], columnNumber = _b[2];
-                            lintName = lineData[2].replace(/[\W]+/g, '');
-                            lintNameLowerCase = lintName.toLowerCase();
-                            url = lintName === lintNameLowerCase
-                                ? "https://dart-lang.github.io/linter/lints/" + lintNameLowerCase + ".html"
-                                : "https://dart.dev/tools/diagnostic-messages#" + lintNameLowerCase;
-                            message = "file=" + file + ",line=" + lineNumber + ",col=" + columnNumber + "::" + (columnNumber + 1) + " For more details, see " + url;
-                            switch (logType) {
-                                case 'error':
-                                    errorCount++;
-                                    break;
-                                case 'warning':
-                                    warningCount++;
-                                    break;
-                                default:
-                                    infoCount++;
-                                    break;
-                            }
-                            console.log("::" + logType + " " + message);
-                        }
-                        catch (error) {
-                            console.log("error in for loop: " + error);
-                        }
-                    }
-                    return [2 /*return*/, [errorCount, warningCount, infoCount]];
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        let outputs = '';
+        let errOutputs = '';
+        const options = { cwd: workingDirectory };
+        options.listeners = {
+            stdout: (data) => {
+                outputs += data.toString();
+            },
+            stderr: (data) => {
+                errOutputs += data.toString();
             }
-        });
+        };
+        const args = [workingDirectory];
+        try {
+            yield exec.exec('dart analyze', args, options);
+        }
+        catch (_) {
+            // dart analyze sometimes fails
+        }
+        let errorCount = 0;
+        let warningCount = 0;
+        let infoCount = 0;
+        const lines = outputs.trim().split(/\r?\n/);
+        const errLines = errOutputs.trim().split(/\r?\n/);
+        const delimiter = '-';
+        for (const line of [...lines, ...errLines]) {
+            if (!line.includes(delimiter)) {
+                continue;
+            }
+            try {
+                const lineData = line.split(delimiter);
+                const logType = lineData[0].trim();
+                const lints = lineData[1].trim().split(' at ');
+                const location = (_a = lints.pop()) === null || _a === void 0 ? void 0 : _a.trim();
+                const lintMessage = lints.join(' at ').trim();
+                const [file, lineNumber, columnNumber] = location.split(':');
+                const lintName = lineData[2].replace(/[\W]+/g, '');
+                const lintNameLowerCase = lintName.toLowerCase();
+                const url = lintName === lintNameLowerCase
+                    ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
+                    : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`;
+                const message = `file=${file},line=${lineNumber},col=${columnNumber}::${lintMessage} [See](${url})`;
+                switch (logType) {
+                    case 'error':
+                        errorCount++;
+                        break;
+                    case 'warning':
+                        warningCount++;
+                        break;
+                    default:
+                        infoCount++;
+                        break;
+                }
+                console.log(`::${logType} ${message}`);
+            }
+            catch (error) {
+                console.log(`error in for loop: ${error}`);
+            }
+        }
+        return [errorCount, warningCount, infoCount];
     });
 }
 exports.analyze = analyze;
@@ -1679,10 +1655,29 @@ exports.analyze = analyze;
 
 /***/ }),
 
-/***/ 921:
+/***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1692,69 +1687,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-exports.__esModule = true;
-var core = __nccwpck_require__(752);
-var path = __nccwpck_require__(622);
-var analyze_1 = __nccwpck_require__(998);
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(186));
+const path = __importStar(__nccwpck_require__(622));
+const analyze_1 = __nccwpck_require__(176);
 function main() {
-    return __awaiter(this, void 0, void 0, function () {
-        var workingDirectory, _a, analyzeErrorCount, analyzeWarningCount, analyzeInfoCount, issueCount, failOnWarnings, message, error_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _b.trys.push([0, 2, , 3]);
-                    workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, core.getInput('working-directory'));
-                    if (!workingDirectory) {
-                        workingDirectory = './';
-                    }
-                    return [4 /*yield*/, analyze_1.analyze(workingDirectory)];
-                case 1:
-                    _a = _b.sent(), analyzeErrorCount = _a[0], analyzeWarningCount = _a[1], analyzeInfoCount = _a[2];
-                    issueCount = analyzeErrorCount + analyzeWarningCount + analyzeInfoCount;
-                    failOnWarnings = core.getInput('fail-on-warnings') === 'true';
-                    message = issueCount + " issue" + (issueCount === 1 ? '' : 's') + " found.";
-                    if (analyzeErrorCount > 0 || (failOnWarnings && issueCount > 0)) {
-                        core.setFailed(message);
-                    }
-                    else {
-                        core.warning;
-                        console.log(message);
-                    }
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_1 = _b.sent();
-                    core.setFailed("error: " + error_1.message);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, core.getInput('working-directory'));
+            if (!workingDirectory) {
+                workingDirectory = './';
             }
-        });
+            const [analyzeErrorCount, analyzeWarningCount, analyzeInfoCount] = yield analyze_1.analyze(workingDirectory);
+            // const formatWarningCount = await format(workingDirectory);
+            const issueCount = analyzeErrorCount + analyzeWarningCount + analyzeInfoCount; // + formatWarningCount;
+            const failOnWarnings = core.getInput('fail-on-warnings') === 'true';
+            const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
+            if (analyzeErrorCount > 0 || (failOnWarnings && issueCount > 0)) {
+                core.setFailed(message);
+            }
+            else {
+                core.warning;
+                console.log(message);
+            }
+        }
+        catch (error) {
+            core.setFailed(`error: ${error.message}`);
+        }
     });
 }
 main();
@@ -1849,6 +1808,6 @@ module.exports = require("util");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(921);
+/******/ 	return __nccwpck_require__(399);
 /******/ })()
 ;

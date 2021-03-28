@@ -8,7 +8,7 @@ import { analyze } from './analyze';
 async function main(): Promise<void> {
 
   try {
-    let workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, core.getInput('working-directory'))
+    let workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, core.getInput('working-directory'))
     if (!workingDirectory) {
       workingDirectory = './';
     }

@@ -48,7 +48,7 @@ export async function analyze(workingDirectory: string): Promise<[number, number
       const lineData = line.split(delimiter);
       const logType = lineData[0].trim();
       const lints = lineData[1].trim().split(' at ');
-      const location = lints.pop().trim();
+      const location = lints.pop()?.trim()!;
       const lintMessage = lints.join(' at ').trim();
       const [file, lineNumber, columnNumber] = location.split(':');
       const lintName = lineData[2].replace(/[\W]+/g, '');
@@ -56,7 +56,7 @@ export async function analyze(workingDirectory: string): Promise<[number, number
       const url = lintName === lintNameLowerCase
         ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
         : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`
-      const message = `file=${file},line=${lineNumber},col=${columnNumber}::${columnNumber+1} For more details, see ${url}`;
+      const message = `file=${file},line=${lineNumber},col=${columnNumber}::${lintMessage} [See](${url})`;
 
       switch(logType) {
         case 'error':
