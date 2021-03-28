@@ -1,4 +1,4 @@
-name: 'Dart Analyzer'
+name: 'Dart Analyze'
 description: 'Analyze a dart code'
 author: 'Valentin Vignal'
 inputs:
@@ -10,12 +10,6 @@ inputs:
     description: 'The working directory. Optional. Default: `./`'
     default: ./
     required: false
-  line-length:
-    description: 'The maximum line length. Optional. The formatter will use its default: `80`'
-    required: false
-outputs:
-  time: # id of output
-    description:  'The time we greeted you'
 runs:
   using: 'node12'
   main: 'dist/index.js'

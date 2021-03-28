@@ -4,12 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc src/main.ts",
+    "package": "ncc build --source-map --license licenses.txt",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ValentinVignal/action-dart-analyze.git"
   },
+  "keywords": [
+    "actions",
+    "dart",
+    "analyze"
+  ],
   "author": "Valentin Vignal",
   "license": "ISC",
   "bugs": {
@@ -17,6 +24,13 @@
   },
   "homepage": "https://github.com/ValentinVignal/action-dart-analyze#readme",
   "devDependencies": {
+    "@types/jest": "^26.0.22",
+    "@vercel/ncc": "^0.27.0",
     "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.0.4",
+    "@actions/github": "^4.0.0"
   }
 }
