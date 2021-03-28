@@ -1,8 +1,8 @@
-
 import * as core from '@actions/core';
 import * as path from 'path';
 
 import { analyze } from './analyze';
+import { FailOn, getFailOn } from './FailOn';
 
 
 async function main(): Promise<void> {
@@ -15,17 +15,36 @@ async function main(): Promise<void> {
 
 
     const [analyzeErrorCount, analyzeWarningCount, analyzeInfoCount] = await analyze(workingDirectory);
+    const failOn = getFailOn();
     // const formatWarningCount = await format(workingDirectory);
 
     const issueCount = analyzeErrorCount + analyzeWarningCount + analyzeInfoCount; // + formatWarningCount;
-    const failOnWarnings = core.getInput('fail-on-warnings') === 'true';
     const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
-
-    if (analyzeErrorCount > 0 || (failOnWarnings && issueCount > 0)) {
-      core.setFailed(message);
-    } else {
-      core.warning
-      console.log(message);
+    
+    switch (failOn) {
+      case FailOn.Nothing:
+        core.warning(message);
+        break;
+      case FailOn.Error:
+        if (analyzeErrorCount) {
+          core.setFailed(message);
+        } else {
+          core.warning(message);
+        }
+        break;
+      case FailOn.Warning:
+        if (analyzeErrorCount + analyzeWarningCount) {
+          core.setFailed(message);
+        } else {
+          core.warning(message);
+        }
+        break;
+      case FailOn.Info:
+        if (analyzeErrorCount + analyzeWarningCount + analyzeInfoCount) {
+          core.setFailed(message);
+        } else {
+          core.warning(message);
+        }
     }
   } catch (error) {
     core.setFailed(`error: ${error.message}`);

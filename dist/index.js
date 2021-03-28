@@ -1545,6 +1545,93 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
+/***/ 925:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getLogKey = exports.getDartAnalyzeLogType = exports.DartAnalyzeLogType = void 0;
+const FailOn_1 = __nccwpck_require__(424);
+var DartAnalyzeLogType;
+(function (DartAnalyzeLogType) {
+    DartAnalyzeLogType[DartAnalyzeLogType["Info"] = 1] = "Info";
+    DartAnalyzeLogType[DartAnalyzeLogType["Warning"] = 2] = "Warning";
+    DartAnalyzeLogType[DartAnalyzeLogType["Error"] = 3] = "Error";
+})(DartAnalyzeLogType = exports.DartAnalyzeLogType || (exports.DartAnalyzeLogType = {}));
+function getDartAnalyzeLogType(key) {
+    switch (key) {
+        case 'error':
+            return DartAnalyzeLogType.Error;
+        case 'warning':
+            return DartAnalyzeLogType.Warning;
+        default:
+            return DartAnalyzeLogType.Info;
+    }
+}
+exports.getDartAnalyzeLogType = getDartAnalyzeLogType;
+function getLogKey(logType) {
+    const failOn = FailOn_1.getFailOn();
+    if (failOn.valueOf() <= logType.valueOf()) {
+        return 'error';
+    }
+    return 'warning';
+}
+exports.getLogKey = getLogKey;
+
+
+/***/ }),
+
+/***/ 424:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getFailOn = exports.FailOn = void 0;
+const core = __importStar(__nccwpck_require__(186));
+var FailOn;
+(function (FailOn) {
+    FailOn[FailOn["Info"] = 0] = "Info";
+    FailOn[FailOn["Warning"] = 1] = "Warning";
+    FailOn[FailOn["Error"] = 2] = "Error";
+    FailOn[FailOn["Nothing"] = 3] = "Nothing";
+})(FailOn = exports.FailOn || (exports.FailOn = {}));
+function getFailOn() {
+    const input = core.getInput('fail-on');
+    switch (input) {
+        case 'nothing':
+            return FailOn.Nothing;
+        case 'info':
+            return FailOn.Info;
+        case 'warning':
+            return FailOn.Warning;
+        default:
+            return FailOn.Error;
+    }
+}
+exports.getFailOn = getFailOn;
+
+
+/***/ }),
+
 /***/ 176:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1580,17 +1667,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.analyze = void 0;
 const exec = __importStar(__nccwpck_require__(514));
-var LogType;
-(function (LogType) {
-    LogType["Info"] = "info";
-    LogType["Warning"] = "warning";
-    LogType["Error"] = "error";
-})(LogType || (LogType = {}));
+const DartAnalyzeLogType_1 = __nccwpck_require__(925);
 function analyze(workingDirectory) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let outputs = '';
         let errOutputs = '';
+        console.log('::group:: Analyze dart code');
         const options = { cwd: workingDirectory };
         options.listeners = {
             stdout: (data) => {
@@ -1619,7 +1702,7 @@ function analyze(workingDirectory) {
             }
             try {
                 const lineData = line.split(delimiter);
-                const logType = lineData[0].trim();
+                const logType = DartAnalyzeLogType_1.getDartAnalyzeLogType(lineData[0].trim());
                 const lints = lineData[1].trim().split(' at ');
                 const location = (_a = lints.pop()) === null || _a === void 0 ? void 0 : _a.trim();
                 const lintMessage = lints.join(' at ').trim();
@@ -1631,22 +1714,21 @@ function analyze(workingDirectory) {
                     : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`;
                 const message = `file=${file},line=${lineNumber},col=${columnNumber}::${lintMessage} [See](${url})`;
                 switch (logType) {
-                    case 'error':
+                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
                         errorCount++;
                         break;
-                    case 'warning':
+                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
                         warningCount++;
                         break;
                     default:
                         infoCount++;
                         break;
                 }
-                console.log(`::${logType} ${message}`);
+                console.log(`::${DartAnalyzeLogType_1.getLogKey(logType)} ${message}`);
             }
-            catch (error) {
-                console.log(`error in for loop: ${error}`);
-            }
+            catch (_) { }
         }
+        console.log('::endgroup::');
         return [errorCount, warningCount, infoCount];
     });
 }
@@ -1691,6 +1773,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const path = __importStar(__nccwpck_require__(622));
 const analyze_1 = __nccwpck_require__(176);
+const FailOn_1 = __nccwpck_require__(424);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1699,16 +1782,37 @@ function main() {
                 workingDirectory = './';
             }
             const [analyzeErrorCount, analyzeWarningCount, analyzeInfoCount] = yield analyze_1.analyze(workingDirectory);
+            const failOn = FailOn_1.getFailOn();
             // const formatWarningCount = await format(workingDirectory);
             const issueCount = analyzeErrorCount + analyzeWarningCount + analyzeInfoCount; // + formatWarningCount;
-            const failOnWarnings = core.getInput('fail-on-warnings') === 'true';
             const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
-            if (analyzeErrorCount > 0 || (failOnWarnings && issueCount > 0)) {
-                core.setFailed(message);
-            }
-            else {
-                core.warning;
-                console.log(message);
+            switch (failOn) {
+                case FailOn_1.FailOn.Nothing:
+                    core.warning(message);
+                    break;
+                case FailOn_1.FailOn.Error:
+                    if (analyzeErrorCount) {
+                        core.setFailed(message);
+                    }
+                    else {
+                        core.warning(message);
+                    }
+                    break;
+                case FailOn_1.FailOn.Warning:
+                    if (analyzeErrorCount + analyzeWarningCount) {
+                        core.setFailed(message);
+                    }
+                    else {
+                        core.warning(message);
+                    }
+                    break;
+                case FailOn_1.FailOn.Info:
+                    if (analyzeErrorCount + analyzeWarningCount + analyzeInfoCount) {
+                        core.setFailed(message);
+                    }
+                    else {
+                        core.warning(message);
+                    }
             }
         }
         catch (error) {

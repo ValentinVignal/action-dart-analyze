@@ -1,18 +1,15 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as github from '@actions/github';
 import * as fs from 'fs';
 import * as path from 'path';
-
-enum LogType {
-  Info = 'info',
-  Warning = 'warning',
-  Error = 'error',
-}
-
+import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
 
 export async function analyze(workingDirectory: string): Promise<[number, number, number]> {
   let outputs = '';
   let errOutputs = '';
+
+  console.log('::group:: Analyze dart code')
 
   const options: exec.ExecOptions = {cwd: workingDirectory};
 
@@ -46,7 +43,7 @@ export async function analyze(workingDirectory: string): Promise<[number, number
     }
     try {
       const lineData = line.split(delimiter);
-      const logType = lineData[0].trim();
+      const logType = getDartAnalyzeLogType(lineData[0].trim() as DartAnalyzeLogTypeKey);
       const lints = lineData[1].trim().split(' at ');
       const location = lints.pop()?.trim()!;
       const lintMessage = lints.join(' at ').trim();
@@ -59,22 +56,21 @@ export async function analyze(workingDirectory: string): Promise<[number, number
       const message = `file=${file},line=${lineNumber},col=${columnNumber}::${lintMessage} [See](${url})`;
 
       switch(logType) {
-        case 'error':
+        case DartAnalyzeLogType.Error:
           errorCount++;
           break;
-        case 'warning':
+        case DartAnalyzeLogType.Warning:
           warningCount++;
           break;
         default:
           infoCount++;
           break;
       }
-      console.log(`::${logType} ${message}`);
+      console.log(`::${getLogKey(logType)} ${message}`);
 
-    } catch (error) {
-      console.log(`error in for loop: ${error}`);
-    }
+    } catch (_) {}
   } 
+  console.log('::endgroup::');
 
   return [errorCount, warningCount, infoCount];
 }
