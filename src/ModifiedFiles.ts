@@ -76,16 +76,18 @@ function parseFile(file: {filename: string, patch?: string|undefined}): Modified
     name: file.filename
   };
   if (file.patch) {
+    console.log(file.filename, 'has patch', file.patch);
     // The changes are included in the file
-    const patches = file.patch.split('@@').filter((_, index) => index % 2 === 0); // Only take the lines
+    const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
+    console.log(patches);
     for (const patch of patches) {
       // path is usually like " -6,7 +6,8"
       try {
         const hasAddition = patch.includes('+');
         const hasDeletion = patch.includes('-');
         if (hasAddition) {
-          const lines = patch.match(/\+.*/)![0].trim().split(',').map((num) => parseInt(num)) as [number, number];
-          modifiedFile.addition ?? [];
+          const lines = patch.match(/\+.*/)![0].trim().slice(1).split(',').map((num) => parseInt(num)) as [number, number];
+          modifiedFile.addition ??= [];
           modifiedFile.addition?.push({
             start: lines[0],
             end: lines[0] + lines[1],
@@ -93,8 +95,8 @@ function parseFile(file: {filename: string, patch?: string|undefined}): Modified
         }
         if (hasDeletion) {
 
-          const lines = patch.split('+')[0].trim().split(',').map((num) => parseInt(num)) as [number, number];
-          modifiedFile.deletion ?? [];
+          const lines = patch.split('+')[0].trim().slice(1).split(',').map((num) => parseInt(num)) as [number, number];
+          modifiedFile.deletion ??= [];
           modifiedFile.deletion?.push({
             start: lines[0],
             end: lines[0] + lines[1],

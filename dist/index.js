@@ -7106,6 +7106,7 @@ function analyze(workingDirectory) {
             // dart analyze sometimes fails
         }
         const modifiedFiles = yield ModifiedFiles_1.getModifiedFiles();
+        console.log('modifiedFiles', modifiedFiles);
         const modifiedFilesMap = new Map();
         for (const modifiedFile of modifiedFiles) {
             modifiedFilesMap.set(modifiedFile.name, modifiedFile);
@@ -7127,6 +7128,7 @@ function analyze(workingDirectory) {
                     continue;
                 }
                 const modifiedFile = modifiedFilesMap.get(parsedLine.file);
+                console.log('parsedLine', parsedLine, 'modifiedFile', modifiedFile);
                 if (!(modifiedFile === null || modifiedFile === void 0 ? void 0 : modifiedFile.addition)) {
                     // Don't lint if there is no addition
                     continue;
@@ -7368,24 +7370,26 @@ function parseFile(file) {
         name: file.filename
     };
     if (file.patch) {
+        console.log(file.filename, 'has patch', file.patch);
         // The changes are included in the file
-        const patches = file.patch.split('@@').filter((_, index) => index % 2 === 0); // Only take the lines
+        const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
+        console.log(patches);
         for (const patch of patches) {
             // path is usually like " -6,7 +6,8"
             try {
                 const hasAddition = patch.includes('+');
                 const hasDeletion = patch.includes('-');
                 if (hasAddition) {
-                    const lines = patch.match(/\+.*/)[0].trim().split(',').map((num) => parseInt(num));
-                    (_a = modifiedFile.addition) !== null && _a !== void 0 ? _a : [];
+                    const lines = patch.match(/\+.*/)[0].trim().slice(1).split(',').map((num) => parseInt(num));
+                    (_a = modifiedFile.addition) !== null && _a !== void 0 ? _a : (modifiedFile.addition = []);
                     (_b = modifiedFile.addition) === null || _b === void 0 ? void 0 : _b.push({
                         start: lines[0],
                         end: lines[0] + lines[1],
                     });
                 }
                 if (hasDeletion) {
-                    const lines = patch.split('+')[0].trim().split(',').map((num) => parseInt(num));
-                    (_c = modifiedFile.deletion) !== null && _c !== void 0 ? _c : [];
+                    const lines = patch.split('+')[0].trim().slice(1).split(',').map((num) => parseInt(num));
+                    (_c = modifiedFile.deletion) !== null && _c !== void 0 ? _c : (modifiedFile.deletion = []);
                     (_d = modifiedFile.deletion) === null || _d === void 0 ? void 0 : _d.push({
                         start: lines[0],
                         end: lines[0] + lines[1],
