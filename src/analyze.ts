@@ -29,8 +29,6 @@ export async function analyze(workingDirectory: string): Promise<[number, number
 
   const modifiedFiles = await getModifiedFiles();
 
-  console.log('modifiedFiles', modifiedFiles);
-
   const modifiedFilesMap = new Map<ModifiedFile['name'], ModifiedFile>();
   for (const modifiedFile of modifiedFiles) {
     modifiedFilesMap.set(modifiedFile.name, modifiedFile);
@@ -54,7 +52,6 @@ export async function analyze(workingDirectory: string): Promise<[number, number
         continue
       }
       const modifiedFile = modifiedFilesMap.get(parsedLine.file);
-      console.log('parsedLine', parsedLine, 'modifiedFile', modifiedFile);
       if (!modifiedFile?.addition) {
         // Don't lint if there is no addition
         continue;

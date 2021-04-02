@@ -7106,7 +7106,6 @@ function analyze(workingDirectory) {
             // dart analyze sometimes fails
         }
         const modifiedFiles = yield ModifiedFiles_1.getModifiedFiles();
-        console.log('modifiedFiles', modifiedFiles);
         const modifiedFilesMap = new Map();
         for (const modifiedFile of modifiedFiles) {
             modifiedFilesMap.set(modifiedFile.name, modifiedFile);
@@ -7128,7 +7127,6 @@ function analyze(workingDirectory) {
                     continue;
                 }
                 const modifiedFile = modifiedFilesMap.get(parsedLine.file);
-                console.log('parsedLine', parsedLine, 'modifiedFile', modifiedFile);
                 if (!(modifiedFile === null || modifiedFile === void 0 ? void 0 : modifiedFile.addition)) {
                     // Don't lint if there is no addition
                     continue;
@@ -7356,8 +7354,6 @@ function getModifiedFiles() {
                 "Please submit an issue on this action's GitHub repo.");
         }
         const files = response.data.files;
-        console.log('files');
-        console.log(files);
         return files.map((file) => {
             return parseFile(file);
         });
@@ -7370,10 +7366,8 @@ function parseFile(file) {
         name: file.filename
     };
     if (file.patch) {
-        console.log(file.filename, 'has patch', file.patch);
         // The changes are included in the file
         const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
-        console.log(patches);
         for (const patch of patches) {
             // path is usually like " -6,7 +6,8"
             try {

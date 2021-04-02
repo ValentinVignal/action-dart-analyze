@@ -63,9 +63,6 @@ export async function getModifiedFiles(): Promise<ModifiedFile[]> {
 
   const files = response.data.files;
 
-  console.log('files');
-  console.log(files);
-
   return files.map((file) => {
     return parseFile(file);
   });
@@ -76,10 +73,8 @@ function parseFile(file: {filename: string, patch?: string|undefined}): Modified
     name: file.filename
   };
   if (file.patch) {
-    console.log(file.filename, 'has patch', file.patch);
     // The changes are included in the file
     const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
-    console.log(patches);
     for (const patch of patches) {
       // path is usually like " -6,7 +6,8"
       try {
