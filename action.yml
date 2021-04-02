@@ -10,6 +10,11 @@ inputs:
     description: 'The working directory. Optional. Default: `./`'
     default: ./
     required: false
+  token:
+    description: 'The github token'
+    required: false
+    default: ${{ github.token }}
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

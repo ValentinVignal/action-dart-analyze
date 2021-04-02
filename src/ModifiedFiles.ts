@@ -3,7 +3,18 @@ import * as core from '@actions/core';
 import { EventName } from './Actions/Github/EventName';
 import { context } from '@actions/github/lib/utils';
 
-export async function getModifiedFiles(): Promise<string[]> {
+interface FileLines {
+  start: number;
+  end: number
+}
+
+export interface ModifiedFile {
+  name: string;
+  deletion?: FileLines[];
+  addition?: FileLines[];
+}
+
+export async function getModifiedFiles(): Promise<ModifiedFile[]> {
   const eventName = github.context.eventName as EventName;
   let base = '';
   let head = '';
@@ -52,6 +63,59 @@ export async function getModifiedFiles(): Promise<string[]> {
 
   const files = response.data.files;
 
-  return files.map((file) => file.filename);
+  console.log('files');
+  console.log(files);
+
+  return files.map((file) => {
+    return parseFile(file);
+  });
+}
+
+function parseFile(file: {filename: string, patch?: string|undefined}): ModifiedFile {
+  const modifiedFile: ModifiedFile = {
+    name: file.filename
+  };
+  if (file.patch) {
+    // The changes are included in the file
+    const patches = file.patch.split('@@').filter((_, index) => index % 2 === 0); // Only take the lines
+    for (const patch of patches) {
+      // path is usually like " -6,7 +6,8"
+      try {
+        const hasAddition = patch.includes('+');
+        const hasDeletion = patch.includes('-');
+        if (hasAddition) {
+          const lines = patch.match(/\+.*/)![0].trim().split(',').map((num) => parseInt(num)) as [number, number];
+          modifiedFile.addition ?? [];
+          modifiedFile.addition?.push({
+            start: lines[0],
+            end: lines[0] + lines[1],
+          });
+        }
+        if (hasDeletion) {
+
+          const lines = patch.split('+')[0].trim().split(',').map((num) => parseInt(num)) as [number, number];
+          modifiedFile.deletion ?? [];
+          modifiedFile.deletion?.push({
+            start: lines[0],
+            end: lines[0] + lines[1],
+          });
+        }
+
+      } catch (error) {
+        console.log(`Error getting the patch of the file:\n${error}`);
+      }
+    }
+  } else {
+    // Take the all file
+    modifiedFile.addition = [{
+        start: 0,
+        end: Infinity,
+    }];
+    modifiedFile.deletion = [{
+        start: 0,
+        end: Infinity,
+    }];
+  }
+  return modifiedFile;
 
 }

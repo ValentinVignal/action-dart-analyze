@@ -1,10 +1,6 @@
-import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as github from '@actions/github';
-import * as fs from 'fs';
-import * as path from 'path';
 import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
-import { getModifiedFiles } from './ModifiedFiles';
+import { getModifiedFiles, ModifiedFile } from './ModifiedFiles';
 
 export async function analyze(workingDirectory: string): Promise<[number, number, number]> {
   let outputs = '';
@@ -33,6 +29,11 @@ export async function analyze(workingDirectory: string): Promise<[number, number
 
   const modifiedFiles = await getModifiedFiles();
 
+  const modifiedFilesMap = new Map<ModifiedFile['name'], ModifiedFile>();
+  for (const modifiedFile of modifiedFiles) {
+    modifiedFilesMap.set(modifiedFile.name, modifiedFile);
+  }
+
   let errorCount = 0;
   let warningCount = 0;
   let infoCount = 0;
@@ -46,9 +47,20 @@ export async function analyze(workingDirectory: string): Promise<[number, number
     }
     try {
       const parsedLine = parseLine(line, delimiter);
-      if (!modifiedFiles.includes(parsedLine.file)) {
+      if (!modifiedFilesMap.has(parsedLine.file)) {
+        // Don't lint anything if the file is not part of the changes
         continue
       }
+      const modifiedFile = modifiedFilesMap.get(parsedLine.file);
+      if (!modifiedFile?.addition) {
+        // Don't lint if there is no addition
+        continue;
+      }
+      if (!modifiedFile!.addition.some((fileLines) => fileLines.start <= parsedLine.line && parsedLine.line <= fileLines.end)) {
+        // Don't lint if the issue doesn't belong to the additions
+        continue;
+      }
+      
       const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message} [See](${parsedLine.url})`;
 
       switch(parsedLine.type) {

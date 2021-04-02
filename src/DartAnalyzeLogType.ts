@@ -1,5 +1,3 @@
-import { FailOn, getFailOn } from "./FailOn";
-
 export enum DartAnalyzeLogType{
   Info = 1,
   Warning = 2,
@@ -23,9 +21,10 @@ export function getDartAnalyzeLogType(key: DartAnalyzeLogTypeKey): DartAnalyzeLo
 
 
 export function getLogKey(logType: DartAnalyzeLogType): LogKey {
-  const failOn = getFailOn();
-  if (failOn.valueOf() <= logType.valueOf()) {
-    return 'error';
+  switch (logType) {
+    case DartAnalyzeLogType.Error:
+      return 'error';
+    default:
+      return 'warning';
   }
-  return 'warning';
 }
