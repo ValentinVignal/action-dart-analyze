@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as path from 'path';
 
-import { analyze } from './analyze';
+import { analyze } from './Analyze';
 import { FailOn, getFailOn } from './FailOn';
 
 

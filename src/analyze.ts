@@ -4,6 +4,7 @@ import * as github from '@actions/github';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
+import { getModifiedFiles } from './ModifiedFiles';
 
 export async function analyze(workingDirectory: string): Promise<[number, number, number]> {
   let outputs = '';
@@ -30,6 +31,8 @@ export async function analyze(workingDirectory: string): Promise<[number, number
     // dart analyze sometimes fails
   }
 
+  const modifiedFiles = await getModifiedFiles();
+
   let errorCount = 0;
   let warningCount = 0;
   let infoCount = 0;
@@ -42,6 +45,49 @@ export async function analyze(workingDirectory: string): Promise<[number, number
       continue;
     }
     try {
+      const parsedLine = parseLine(line, delimiter);
+      if (!modifiedFiles.includes(parsedLine.file)) {
+        continue
+      }
+      const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message} [See](${parsedLine.url})`;
+
+      switch(parsedLine.type) {
+        case DartAnalyzeLogType.Error:
+          errorCount++;
+          break;
+        case DartAnalyzeLogType.Warning:
+          warningCount++;
+          break;
+        default:
+          infoCount++;
+          break;
+      }
+      console.log(`::${getLogKey(parsedLine.type)} ${message}`);
+
+    } catch (_) {}
+  } 
+  console.log('::endgroup::');
+
+  return [errorCount, warningCount, infoCount];
+}
+
+interface ParsedLine {
+  file: string;
+  line: number;
+  column: number;
+  message: string;
+  url: string;
+  type: DartAnalyzeLogType
+}
+
+/**
+ * @description Extract useful information from a line
+ * 
+ * @param line 
+ * @param delimiter 
+ * @returns 
+ */
+function parseLine(line: string, delimiter: string): ParsedLine {
       const lineData = line.split(delimiter);
       const logType = getDartAnalyzeLogType(lineData[0].trim() as DartAnalyzeLogTypeKey);
       const lints = lineData[1].trim().split(' at ');
@@ -53,25 +99,14 @@ export async function analyze(workingDirectory: string): Promise<[number, number
       const url = lintName === lintNameLowerCase
         ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
         : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`
-      const message = `file=${file},line=${lineNumber},col=${columnNumber}::${lintMessage} [See](${url})`;
-
-      switch(logType) {
-        case DartAnalyzeLogType.Error:
-          errorCount++;
-          break;
-        case DartAnalyzeLogType.Warning:
-          warningCount++;
-          break;
-        default:
-          infoCount++;
-          break;
+      return {
+        file,
+        line: parseInt(lineNumber),
+        column: parseInt(columnNumber),
+        message: lintMessage,
+        url,
+        type: logType,
       }
-      console.log(`::${getLogKey(logType)} ${message}`);
 
-    } catch (_) {}
-  } 
-  console.log('::endgroup::');
-
-  return [errorCount, warningCount, infoCount];
 }
 
