@@ -1,6 +1,6 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
-import { EventName } from '../Actions/Github/EventName';
+import { EventName } from '../actions/github/EventName';
 import { context } from '@actions/github/lib/utils';
 
 interface FileLinesInterface {

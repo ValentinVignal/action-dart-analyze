@@ -7089,6 +7089,14 @@ class AnalyzeResult {
         this.counts = new AnalyzeResultCounts(params.counts);
         this.lines = params.lines;
     }
+    // Whether it is a success (not failing results)
+    get isSuccess() {
+        return !this.counts.failCount;
+    }
+    // Whether it has logs (even not failing ones)
+    get hasWarning() {
+        return !!this.counts.total;
+    }
 }
 exports.AnalyzeResult = AnalyzeResult;
 
@@ -7143,6 +7151,7 @@ const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 class ParsedLine {
     constructor(params) {
         var _a, _b;
+        this.originalLine = params.line;
         const lineData = params.line.split((_a = params === null || params === void 0 ? void 0 : params.delimiter) !== null && _a !== void 0 ? _a : '-');
         this.type = DartAnalyzeLogType_1.getDartAnalyzeLogType(lineData[0].trim());
         const lints = lineData[1].trim().split(' at ');
@@ -7228,8 +7237,6 @@ function analyze(workingDirectory) {
         }
         const modifiedFiles = new ModifiedFiles_1.ModifiedFiles();
         yield modifiedFiles.isInit;
-        console.log('modifiedFiles');
-        console.dir(modifiedFiles, { depth: null });
         let errorCount = 0;
         let warningCount = 0;
         let infoCount = 0;
@@ -7246,20 +7253,15 @@ function analyze(workingDirectory) {
                     line,
                     delimiter,
                 });
-                console.log('-------------------- new parsedLine --------------------');
-                console.dir(parsedLine, { depth: null });
                 if (!modifiedFiles.has(parsedLine.file)) {
-                    console.log('no modified file', parsedLine.file);
                     // Don't lint anything if the file is not part of the changes
                     continue;
                 }
                 const modifiedFile = modifiedFiles.get(parsedLine.file);
                 if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
-                    console.log('no addition for file', parsedLine.file, 'and line', parsedLine.line);
                     // Don't lint if the issue doesn't belong to the additions
                     continue;
                 }
-                console.log('!! parsedLine is kept !!');
                 parsedLines.push(parsedLine);
                 const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
                 switch (parsedLine.type) {
@@ -7332,7 +7334,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
 const analyze_1 = __nccwpck_require__(115);
-const Comment_1 = __nccwpck_require__(961);
+const Result_1 = __nccwpck_require__(6529);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -7341,26 +7343,116 @@ function main() {
                 workingDirectory = './';
             }
             const analyzeResult = yield analyze_1.analyze(workingDirectory);
-            // const formatWarningCount = await format(workingDirectory);
-            // const success = isSuccess(analyzeResult);
-            const success = analyzeResult.counts.failCount === 0;
-            yield logResult({ success, result: analyzeResult });
+            const result = new Result_1.Result({
+                analyze: analyzeResult,
+            });
+            yield result.comment();
+            result.log();
         }
         catch (error) {
             core.setFailed(`error: ${error.message}`);
         }
     });
 }
-function logResult(params) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const issueCount = params.result.counts.info + params.result.counts.warnings + params.result.counts.errors; // + formatWarningCount;
-        const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
-        yield Comment_1.comment({ message });
-        const logger = params.success ? core.warning : core.setFailed;
-        logger(message);
-    });
-}
 main();
+
+
+/***/ }),
+
+/***/ 6529:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Result = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const Comment_1 = __nccwpck_require__(961);
+const FailOn_1 = __nccwpck_require__(1613);
+/**
+ * Handle and summarize the results
+ */
+class Result {
+    constructor(params) {
+        this.analyze = params.analyze;
+    }
+    /**
+     * Put a comment on the PR
+     */
+    comment() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const messages = [
+                this.issueCountMessage()
+            ];
+            messages.push('\n---\n');
+            for (const line of this.analyze.lines) {
+                messages.push(`- ${line.originalLine}. [See](${line.url})`);
+            }
+            yield Comment_1.comment({ message: messages.join('\n'), reacts: [this.react] });
+        });
+    }
+    /**
+     * React to the comment on the PR
+     */
+    get react() {
+        return '+1';
+    }
+    issueCountMessage() {
+        const messages = [
+            `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`,
+        ];
+        if (!!this.analyze.counts.total && ![FailOn_1.FailOn.Info, FailOn_1.FailOn.Nothing].includes(FailOn_1.getFailOn())) {
+            // Issues are found and there are some non failing logs and failing logs
+            const failCount = this.analyze.counts.failCount;
+            messages.push(`- ${failCount} critical issue${Result.pluralS(failCount)}`);
+            messages.push(`- ${this.analyze.counts.total - failCount} non failing issue${Result.pluralS(this.analyze.counts.failCount)}`);
+        }
+        return messages.join('\n');
+    }
+    /**
+     * Log the results in the github action
+     */
+    log() {
+        const logger = this.analyze.isSuccess ? core.warning : core.setFailed;
+        logger(this.issueCountMessage());
+    }
+    static indent(times) {
+        return ' '.repeat(times * Result.githubIndentation);
+    }
+    static pluralS(count) {
+        return count > 1 ? 's' : '';
+    }
+}
+exports.Result = Result;
+Result.githubIndentation = 2;
 
 
 /***/ }),

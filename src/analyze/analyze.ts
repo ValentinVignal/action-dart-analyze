@@ -32,9 +32,6 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
   const modifiedFiles = new ModifiedFiles();
   await modifiedFiles.isInit;
 
-  console.log('modifiedFiles');
-  console.dir(modifiedFiles, { depth: null });
-
   let errorCount = 0;
   let warningCount = 0;
   let infoCount = 0;
@@ -53,22 +50,15 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
         line,
         delimiter,
       });
-      console.log('-------------------- new parsedLine --------------------');
-      console.dir(parsedLine, { depth: null });
       if (!modifiedFiles.has(parsedLine.file)) {
-        console.log('no modified file', parsedLine.file);
         // Don't lint anything if the file is not part of the changes
         continue
       }
       const modifiedFile = modifiedFiles.get(parsedLine.file)!;
       if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
-        console.log('no addition for file', parsedLine.file, 'and line', parsedLine.line);
         // Don't lint if the issue doesn't belong to the additions
         continue;
       }
-
-      console.log('!! parsedLine is kept !!');
-
 
       parsedLines.push(parsedLine);
       const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;

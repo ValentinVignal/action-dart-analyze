@@ -7,6 +7,7 @@ export interface ParsedLineInterface {
   message: string;
   url: string;
   type: DartAnalyzeLogType
+  originalLine: string;
 }
 
 export class ParsedLine {
@@ -16,9 +17,10 @@ export class ParsedLine {
   message: string;
   url: string;
   type: DartAnalyzeLogType
-
+  originalLine: string;
 
   constructor(params: {line: string, delimiter?: string}) {
+      this.originalLine = params.line;
       const lineData = params.line.split(params?.delimiter?? '-');
       this.type = getDartAnalyzeLogType(lineData[0].trim() as DartAnalyzeLogTypeKey);
       const lints = lineData[1].trim().split(' at ');

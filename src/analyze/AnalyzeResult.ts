@@ -60,4 +60,14 @@ export class AnalyzeResult {
     this.counts = new AnalyzeResultCounts(params.counts);
     this.lines =  params.lines;
   }
+
+  // Whether it is a success (not failing results)
+  public get isSuccess(): boolean {
+    return !this.counts.failCount
+  }
+
+  // Whether it has logs (even not failing ones)
+  public get hasWarning(): boolean {
+    return !!this.counts.total;
+  }
 }
