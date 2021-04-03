@@ -1,4 +1,4 @@
-import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType } from "../DartAnalyzeLogType";
+import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType } from "./DartAnalyzeLogType";
 
 export interface ParsedLineInterface {
   file: string;

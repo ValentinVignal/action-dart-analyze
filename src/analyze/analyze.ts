@@ -1,8 +1,8 @@
 import * as exec from '@actions/exec';
-import { DartAnalyzeLogType, getLogKey } from '../DartAnalyzeLogType';
-import { getModifiedFiles, ModifiedFile } from '../ModifiedFiles';
+import { DartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
 import { AnalyzeResult } from './AnalyzeResult';
 import { ParsedLine } from './ParsedLine';
+import { ModifiedFiles } from '../utils/ModifiedFiles';
 
 export async function analyze(workingDirectory: string): Promise<AnalyzeResult> {
   let outputs = '';
@@ -29,15 +29,11 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
     // dart analyze sometimes fails
   }
 
-  const modifiedFiles = await getModifiedFiles();
+  const modifiedFiles = new ModifiedFiles();
+  await modifiedFiles.isInit;
 
   console.log('modifiedFiles');
-  console.log(modifiedFiles);
-
-  const modifiedFilesMap = new Map<ModifiedFile['name'], ModifiedFile>();
-  for (const modifiedFile of modifiedFiles) {
-    modifiedFilesMap.set(modifiedFile.name, modifiedFile);
-  }
+  console.dir(modifiedFiles, { depth: null });
 
   let errorCount = 0;
   let warningCount = 0;
@@ -57,21 +53,21 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
         line,
         delimiter,
       });
-      console.log('parsedLine');
-      console.log(parsedLine);
-      if (!modifiedFilesMap.has(parsedLine.file)) {
+      console.log('-------------------- new parsedLine --------------------');
+      console.dir(parsedLine, { depth: null });
+      if (!modifiedFiles.has(parsedLine.file)) {
+        console.log('no modified file', parsedLine.file);
         // Don't lint anything if the file is not part of the changes
         continue
       }
-      const modifiedFile = modifiedFilesMap.get(parsedLine.file);
-      if (!modifiedFile?.addition) {
-        // Don't lint if there is no addition
-        continue;
-      }
-      if (!modifiedFile!.addition.some((fileLines) => fileLines.start <= parsedLine.line && parsedLine.line <= fileLines.end)) {
+      const modifiedFile = modifiedFiles.get(parsedLine.file)!;
+      if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
+        console.log('no addition for file', parsedLine.file, 'and line', parsedLine.line);
         // Don't lint if the issue doesn't belong to the additions
         continue;
       }
+
+      console.log('!! parsedLine is kept !!');
 
 
       parsedLines.push(parsedLine);

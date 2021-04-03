@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { analyze } from './analyze/analyze';
 import { AnalyzeResult } from './analyze/AnalyzeResult';
-import { comment } from './Comment';
+import { comment } from './utils/Comment';
 
 
 async function main(): Promise<void> {

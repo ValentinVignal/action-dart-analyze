@@ -1,4 +1,4 @@
-import { FailOn, getFailOn } from "../FailOn";
+import { FailOn, getFailOn } from "../utils/FailOn";
 import { ParsedLine } from "./ParsedLine";
 
 export interface AnalyzeResultCountsInterface {
