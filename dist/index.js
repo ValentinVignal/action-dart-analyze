@@ -7046,162 +7046,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 2731:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.analyze = void 0;
-const exec = __importStar(__nccwpck_require__(1514));
-const DartAnalyzeLogType_1 = __nccwpck_require__(8925);
-const ModifiedFiles_1 = __nccwpck_require__(1894);
-function analyze(workingDirectory) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let outputs = '';
-        let errOutputs = '';
-        console.log('::group:: Analyze dart code');
-        const options = { cwd: workingDirectory };
-        options.listeners = {
-            stdout: (data) => {
-                outputs += data.toString();
-            },
-            stderr: (data) => {
-                errOutputs += data.toString();
-            }
-        };
-        const args = [workingDirectory];
-        try {
-            yield exec.exec('dart analyze', args, options);
-        }
-        catch (_) {
-            // dart analyze sometimes fails
-        }
-        const modifiedFiles = yield ModifiedFiles_1.getModifiedFiles();
-        console.log('modifiedFiles', modifiedFiles);
-        const modifiedFilesMap = new Map();
-        for (const modifiedFile of modifiedFiles) {
-            modifiedFilesMap.set(modifiedFile.name, modifiedFile);
-        }
-        let errorCount = 0;
-        let warningCount = 0;
-        let infoCount = 0;
-        const lines = outputs.trim().split(/\r?\n/);
-        const errLines = errOutputs.trim().split(/\r?\n/);
-        const delimiter = '-';
-        const parsedLines = [];
-        for (const line of [...lines, ...errLines]) {
-            if (!line.includes(delimiter)) {
-                continue;
-            }
-            try {
-                const parsedLine = parseLine(line, delimiter);
-                console.log('parsedLine', parseLine);
-                if (!modifiedFilesMap.has(parsedLine.file)) {
-                    // Don't lint anything if the file is not part of the changes
-                    continue;
-                }
-                const modifiedFile = modifiedFilesMap.get(parsedLine.file);
-                if (!(modifiedFile === null || modifiedFile === void 0 ? void 0 : modifiedFile.addition)) {
-                    // Don't lint if there is no addition
-                    continue;
-                }
-                if (!modifiedFile.addition.some((fileLines) => fileLines.start <= parsedLine.line && parsedLine.line <= fileLines.end)) {
-                    // Don't lint if the issue doesn't belong to the additions
-                    continue;
-                }
-                parsedLines.push(parsedLine);
-                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
-                switch (parsedLine.type) {
-                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
-                        errorCount++;
-                        break;
-                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
-                        warningCount++;
-                        break;
-                    default:
-                        infoCount++;
-                        break;
-                }
-                console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`); // Log the issue
-            }
-            catch (error) {
-                console.log(`Error analyzing line ${line}:\n${error}`);
-            }
-        }
-        console.log('::endgroup::');
-        return {
-            counts: {
-                info: infoCount,
-                warnings: warningCount,
-                errors: errorCount,
-            },
-            lines: parsedLines,
-        };
-    });
-}
-exports.analyze = analyze;
-/**
- * @description Extract useful information from a line
- *
- * @param line
- * @param delimiter
- * @returns
- */
-function parseLine(line, delimiter) {
-    var _a;
-    const lineData = line.split(delimiter);
-    const logType = DartAnalyzeLogType_1.getDartAnalyzeLogType(lineData[0].trim());
-    const lints = lineData[1].trim().split(' at ');
-    const location = (_a = lints.pop()) === null || _a === void 0 ? void 0 : _a.trim();
-    const lintMessage = lints.join(' at ').trim();
-    const [file, lineNumber, columnNumber] = location.split(':');
-    const lintName = lineData[2].replace(/[\W]+/g, '');
-    const lintNameLowerCase = lintName.toLowerCase();
-    const url = lintName === lintNameLowerCase
-        ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
-        : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`;
-    return {
-        file,
-        line: parseInt(lineNumber),
-        column: parseInt(columnNumber),
-        message: lintMessage,
-        url,
-        type: logType,
-    };
-}
-
-
-/***/ }),
-
 /***/ 129:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7497,6 +7341,222 @@ function parseFile(file) {
 
 /***/ }),
 
+/***/ 4896:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AnalyzeResult = void 0;
+const FailOn_1 = __nccwpck_require__(9424);
+/**
+ * Different log counts from the dart Analyze
+ */
+class AnalyzeResultCounts {
+    constructor(params) {
+        this.info = params.info;
+        this.warnings = params.warnings;
+        this.errors = params.errors;
+    }
+    /**
+     * The total number of logs
+     */
+    get total() {
+        return this.info + this.warnings + this.errors;
+    }
+    get failCount() {
+        const failOn = FailOn_1.getFailOn();
+        let count = 0;
+        if (failOn !== FailOn_1.FailOn.Nothing) {
+            count += this.errors;
+            if (failOn !== FailOn_1.FailOn.Error) {
+                count += this.warnings;
+                if (failOn !== FailOn_1.FailOn.Warning) {
+                    count += this.info;
+                }
+            }
+        }
+        return count;
+    }
+}
+class AnalyzeResult {
+    constructor(params) {
+        this.counts = new AnalyzeResultCounts(params.counts);
+        this.lines = params.lines;
+    }
+}
+exports.AnalyzeResult = AnalyzeResult;
+
+
+/***/ }),
+
+/***/ 1738:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ParsedLine = void 0;
+const DartAnalyzeLogType_1 = __nccwpck_require__(8925);
+class ParsedLine {
+    constructor(params) {
+        var _a, _b;
+        const lineData = params.line.split((_a = params === null || params === void 0 ? void 0 : params.delimiter) !== null && _a !== void 0 ? _a : '-');
+        this.type = DartAnalyzeLogType_1.getDartAnalyzeLogType(lineData[0].trim());
+        const lints = lineData[1].trim().split(' at ');
+        const location = (_b = lints.pop()) === null || _b === void 0 ? void 0 : _b.trim();
+        const lintMessage = lints.join(' at ').trim();
+        const [file, lineNumber, columnNumber] = location.split(':');
+        const lintName = lineData[2].replace(/[\W]+/g, '');
+        const lintNameLowerCase = lintName.toLowerCase();
+        this.url = lintName === lintNameLowerCase
+            ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
+            : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`;
+        this.file = file;
+        this.line = parseInt(lineNumber);
+        this.column = parseInt(columnNumber);
+        this.message = lintMessage;
+    }
+}
+exports.ParsedLine = ParsedLine;
+
+
+/***/ }),
+
+/***/ 115:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.analyze = void 0;
+const exec = __importStar(__nccwpck_require__(1514));
+const DartAnalyzeLogType_1 = __nccwpck_require__(8925);
+const ModifiedFiles_1 = __nccwpck_require__(1894);
+const AnalyzeResult_1 = __nccwpck_require__(4896);
+const ParsedLine_1 = __nccwpck_require__(1738);
+function analyze(workingDirectory) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let outputs = '';
+        let errOutputs = '';
+        console.log('::group:: Analyze dart code');
+        const options = { cwd: workingDirectory };
+        options.listeners = {
+            stdout: (data) => {
+                outputs += data.toString();
+            },
+            stderr: (data) => {
+                errOutputs += data.toString();
+            }
+        };
+        const args = [workingDirectory];
+        try {
+            yield exec.exec('dart analyze', args, options);
+        }
+        catch (_) {
+            // dart analyze sometimes fails
+        }
+        const modifiedFiles = yield ModifiedFiles_1.getModifiedFiles();
+        console.log('modifiedFiles');
+        console.log(modifiedFiles);
+        const modifiedFilesMap = new Map();
+        for (const modifiedFile of modifiedFiles) {
+            modifiedFilesMap.set(modifiedFile.name, modifiedFile);
+        }
+        let errorCount = 0;
+        let warningCount = 0;
+        let infoCount = 0;
+        const lines = outputs.trim().split(/\r?\n/);
+        const errLines = errOutputs.trim().split(/\r?\n/);
+        const delimiter = '-';
+        const parsedLines = [];
+        for (const line of [...lines, ...errLines]) {
+            if (!line.includes(delimiter)) {
+                continue;
+            }
+            try {
+                const parsedLine = new ParsedLine_1.ParsedLine({
+                    line,
+                    delimiter,
+                });
+                console.log('parsedLine');
+                console.log(parsedLine);
+                if (!modifiedFilesMap.has(parsedLine.file)) {
+                    // Don't lint anything if the file is not part of the changes
+                    continue;
+                }
+                const modifiedFile = modifiedFilesMap.get(parsedLine.file);
+                if (!(modifiedFile === null || modifiedFile === void 0 ? void 0 : modifiedFile.addition)) {
+                    // Don't lint if there is no addition
+                    continue;
+                }
+                if (!modifiedFile.addition.some((fileLines) => fileLines.start <= parsedLine.line && parsedLine.line <= fileLines.end)) {
+                    // Don't lint if the issue doesn't belong to the additions
+                    continue;
+                }
+                parsedLines.push(parsedLine);
+                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
+                switch (parsedLine.type) {
+                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
+                        errorCount++;
+                        break;
+                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
+                        warningCount++;
+                        break;
+                    default:
+                        infoCount++;
+                        break;
+                }
+                console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`); // Log the issue
+            }
+            catch (error) {
+                console.log(`Error analyzing line ${line}:\n${error}`);
+            }
+        }
+        console.log('::endgroup::');
+        return new AnalyzeResult_1.AnalyzeResult({
+            counts: {
+                info: infoCount,
+                warnings: warningCount,
+                errors: errorCount,
+            },
+            lines: parsedLines,
+        });
+    });
+}
+exports.analyze = analyze;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7533,9 +7593,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
-const Analyze_1 = __nccwpck_require__(2731);
+const analyze_1 = __nccwpck_require__(115);
 const Comment_1 = __nccwpck_require__(129);
-const FailOn_1 = __nccwpck_require__(9424);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -7543,47 +7602,16 @@ function main() {
             if (!workingDirectory) {
                 workingDirectory = './';
             }
-            const analyzeResult = yield Analyze_1.analyze(workingDirectory);
+            const analyzeResult = yield analyze_1.analyze(workingDirectory);
             // const formatWarningCount = await format(workingDirectory);
-            const success = isSuccess(analyzeResult);
+            // const success = isSuccess(analyzeResult);
+            const success = analyzeResult.counts.failCount === 0;
             yield logResult({ success, result: analyzeResult });
         }
         catch (error) {
             core.setFailed(`error: ${error.message}`);
         }
     });
-}
-function isSuccess(result) {
-    const failOn = FailOn_1.getFailOn();
-    switch (failOn) {
-        case FailOn_1.FailOn.Nothing:
-            return true;
-        // core.warning(message);
-        // break;
-        case FailOn_1.FailOn.Error:
-            return !!result.counts.errors;
-        // if (result.counts.errors) {
-        //   core.setFailed(message);
-        // } else {
-        //   core.warning(message);
-        // }
-        // break;
-        case FailOn_1.FailOn.Warning:
-            return !!(result.counts.errors + result.counts.info);
-        // if (result.counts.errors + result.counts.info) {
-        //   core.setFailed(message);
-        // } else {
-        //   core.warning(message);
-        // }
-        // break;
-        case FailOn_1.FailOn.Info:
-            return !!(result.counts.errors + result.counts.warnings + result.counts.info);
-        // if (result.counts.errors + result.counts.warnings + result.counts.info) {
-        //   core.setFailed(params.message);
-        // } else {
-        //   core.warning(params.message);
-        // }
-    }
 }
 function logResult(params) {
     return __awaiter(this, void 0, void 0, function* () {

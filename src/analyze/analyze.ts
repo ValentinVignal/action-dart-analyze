@@ -1,15 +1,8 @@
 import * as exec from '@actions/exec';
-import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
-import { getModifiedFiles, ModifiedFile } from './ModifiedFiles';
-
-export interface AnalyzeResult {
-  counts: {
-    info: number;
-    warnings: number;
-    errors: number;
-  };
-  lines: ParsedLine[]; 
-}
+import { DartAnalyzeLogType, getLogKey } from '../DartAnalyzeLogType';
+import { getModifiedFiles, ModifiedFile } from '../ModifiedFiles';
+import { AnalyzeResult } from './AnalyzeResult';
+import { ParsedLine } from './ParsedLine';
 
 export async function analyze(workingDirectory: string): Promise<AnalyzeResult> {
   let outputs = '';
@@ -38,7 +31,8 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
 
   const modifiedFiles = await getModifiedFiles();
 
-  console.log('modifiedFiles', modifiedFiles);
+  console.log('modifiedFiles');
+  console.log(modifiedFiles);
 
   const modifiedFilesMap = new Map<ModifiedFile['name'], ModifiedFile>();
   for (const modifiedFile of modifiedFiles) {
@@ -59,8 +53,12 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
       continue;
     }
     try {
-      const parsedLine = parseLine(line, delimiter);
-      console.log('parsedLine', parseLine);
+      const parsedLine = new ParsedLine({
+        line,
+        delimiter,
+      });
+      console.log('parsedLine');
+      console.log(parsedLine);
       if (!modifiedFilesMap.has(parsedLine.file)) {
         // Don't lint anything if the file is not part of the changes
         continue
@@ -98,52 +96,12 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
   } 
   console.log('::endgroup::');
 
-  return {
+  return new AnalyzeResult({
     counts: {
       info: infoCount,
       warnings: warningCount,
       errors: errorCount,
     },
     lines: parsedLines,
-  };
+  });
 }
-
-interface ParsedLine {
-  file: string;
-  line: number;
-  column: number;
-  message: string;
-  url: string;
-  type: DartAnalyzeLogType
-}
-
-/**
- * @description Extract useful information from a line
- * 
- * @param line 
- * @param delimiter 
- * @returns 
- */
-function parseLine(line: string, delimiter: string): ParsedLine {
-      const lineData = line.split(delimiter);
-      const logType = getDartAnalyzeLogType(lineData[0].trim() as DartAnalyzeLogTypeKey);
-      const lints = lineData[1].trim().split(' at ');
-      const location = lints.pop()?.trim()!;
-      const lintMessage = lints.join(' at ').trim();
-      const [file, lineNumber, columnNumber] = location.split(':');
-      const lintName = lineData[2].replace(/[\W]+/g, '');
-      const lintNameLowerCase = lintName.toLowerCase();
-      const url = lintName === lintNameLowerCase
-        ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
-        : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`
-      return {
-        file,
-        line: parseInt(lineNumber),
-        column: parseInt(columnNumber),
-        message: lintMessage,
-        url,
-        type: logType,
-      }
-
-}
-
