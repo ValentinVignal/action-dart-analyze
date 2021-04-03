@@ -1,4 +1,4 @@
-import { FailOn, getFailOn } from "../utils/FailOn";
+import { failOn, FailOn } from "../utils/FailOn";
 import { ParsedLine } from "./ParsedLine";
 
 export interface AnalyzeResultCountsInterface {
@@ -28,7 +28,6 @@ class AnalyzeResultCounts {
   }
 
   public get failCount(): number {
-    const failOn = getFailOn();
     let count = 0;
     if (failOn !== FailOn.Nothing) {
       count += this.errors;

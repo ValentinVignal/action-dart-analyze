@@ -7,8 +7,9 @@ export enum FailOn{
   Nothing = 3,
 }
 
-export function getFailOn(): FailOn{
-  
+export const failOn = getFailOn();
+
+function getFailOn(): FailOn{
   const input = core.getInput('fail-on');
   switch(input) {
     case 'nothing':

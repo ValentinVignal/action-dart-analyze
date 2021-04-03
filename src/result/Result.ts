@@ -1,7 +1,8 @@
 import * as core from '@actions/core';
 import { AnalyzeResult } from "../analyze/AnalyzeResult";
+import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from '../analyze/DartAnalyzeLogType';
 import { comment, CommentReact } from "../utils/Comment";
-import { FailOn, getFailOn } from "../utils/FailOn";
+import { failOn, FailOn } from "../utils/FailOn";
 
 export interface ResultInterface {
   analyze: AnalyzeResult;
@@ -36,13 +37,13 @@ export class Result {
       if (line.urls.length > 1) {
         urls += ` or [link](${line.urls[1]})`
       }
-      
       let failEmoji = '';
-      const failOn = getFailOn();
       if (![FailOn.Nothing, FailOn.Info].includes(failOn)) {
         failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
       }
-      messages.push(`- ${failEmoji}${line.emoji} ${line.originalLine}. See ${urls}`);
+      
+      const highlight = line.isFail ? '**': '';
+      messages.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
     }
 
     await comment({message: messages.join('\n'), reacts: [this.react]});
@@ -56,8 +57,26 @@ export class Result {
   }
 
   private issueCountMessage(params?: {emojis?: boolean}): string {
-    const messages: string[] = [];
-    const titleLine = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
+    const messages: string[] = [
+      this.title(params),
+      this.titleLine({
+        ...params,
+        type: DartAnalyzeLogTypeEnum.Error,
+      }),
+      this.titleLine({
+        ...params,
+        type: DartAnalyzeLogTypeEnum.Warning,
+      }),
+      this.titleLine({
+        ...params,
+        type: DartAnalyzeLogTypeEnum.Info,
+      }),
+    ];
+    return messages.join('\n');
+  }
+
+  private title(params?: {emojis?: boolean}): string {
+    const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
     if (params?.emojis) {
       let emoji = ':tada:';
       if (this.analyze.counts.failCount) {
@@ -65,26 +84,39 @@ export class Result {
       } else if (this.analyze.counts.total) {
         emoji = ':warning:';
       }
-      messages.push(`${emoji} ${titleLine}`);
+      return `${emoji} ${title}`;
     } else {
-      messages.push(titleLine);
+      return title;
     }
-    if (!!this.analyze.counts.total && ![FailOn.Info, FailOn.Nothing].includes(getFailOn())) {
-      // Issues are found and there are some non failing logs and failing logs
-      const failCount = this.analyze.counts.failCount;
-      let firstLine = `${failCount} critical issue${Result.pluralS(failCount)}`;
-      if (params?.emojis) {
-        firstLine = `:${failCount ? 'x' : 'white_check_mark'}: ${firstLine}`
-      }
-      let secondLine = `${this.analyze.counts.total - failCount} non failing issue${Result.pluralS(this.analyze.counts.failCount)}`
-      if (params?.emojis) {
-        secondLine = `:${this.analyze.counts.total - failCount ? 'warning': 'white_check_mark'}: ${secondLine}`
-      }
-      messages.push(`- ${firstLine}`);
-      messages.push(`- ${secondLine}`);
+  }
+
+  private titleLine(params: {emojis?: boolean, type: DartAnalyzeLogTypeEnum}): string {
+    const isFail = DartAnalyzeLogType.isFail(params.type);
+    let emoji = '';
+    let count: number;
+    let line = '';
+    switch (params.type) {
+      case DartAnalyzeLogTypeEnum.Error:
+        count = this.analyze.counts.errors;
+        emoji = count ? 'x' : 'white_check_mark';
+        line = `${count} error${Result.pluralS(count)}`
+        break;
+      case DartAnalyzeLogTypeEnum.Warning:
+        count = this.analyze.counts.warnings;
+        emoji = count ? 'warning' : 'tada'
+        line = `${count} warning${Result.pluralS(count)}`
+        break;
+      case DartAnalyzeLogTypeEnum.Info:
+        count = this.analyze.counts.info;
+        emoji = count ? 'eyes' : 'rocket';
+        line = `${count} info log${Result.pluralS(count)}`
+        break;
     }
-    return messages.join('\n');
-    
+
+    const highlight = isFail && params.emojis && count ? '**' : '';
+    emoji = `:${emoji}: `;
+    line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
+    return line;
   }
 
   /**

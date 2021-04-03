@@ -7070,13 +7070,12 @@ class AnalyzeResultCounts {
         return this.info + this.warnings + this.errors;
     }
     get failCount() {
-        const failOn = FailOn_1.getFailOn();
         let count = 0;
-        if (failOn !== FailOn_1.FailOn.Nothing) {
+        if (FailOn_1.failOn !== FailOn_1.FailOn.Nothing) {
             count += this.errors;
-            if (failOn !== FailOn_1.FailOn.Error) {
+            if (FailOn_1.failOn !== FailOn_1.FailOn.Error) {
                 count += this.warnings;
-                if (failOn !== FailOn_1.FailOn.Warning) {
+                if (FailOn_1.failOn !== FailOn_1.FailOn.Warning) {
                     count += this.info;
                 }
             }
@@ -7104,38 +7103,53 @@ exports.AnalyzeResult = AnalyzeResult;
 /***/ }),
 
 /***/ 5054:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getLogKey = exports.getDartAnalyzeLogType = exports.DartAnalyzeLogType = void 0;
-var DartAnalyzeLogType;
-(function (DartAnalyzeLogType) {
-    DartAnalyzeLogType[DartAnalyzeLogType["Info"] = 1] = "Info";
-    DartAnalyzeLogType[DartAnalyzeLogType["Warning"] = 2] = "Warning";
-    DartAnalyzeLogType[DartAnalyzeLogType["Error"] = 3] = "Error";
-})(DartAnalyzeLogType = exports.DartAnalyzeLogType || (exports.DartAnalyzeLogType = {}));
-function getDartAnalyzeLogType(key) {
-    switch (key) {
-        case 'error':
-            return DartAnalyzeLogType.Error;
-        case 'warning':
-            return DartAnalyzeLogType.Warning;
-        default:
-            return DartAnalyzeLogType.Info;
+exports.DartAnalyzeLogType = exports.DartAnalyzeLogTypeEnum = void 0;
+const FailOn_1 = __nccwpck_require__(1613);
+var DartAnalyzeLogTypeEnum;
+(function (DartAnalyzeLogTypeEnum) {
+    DartAnalyzeLogTypeEnum[DartAnalyzeLogTypeEnum["Info"] = 1] = "Info";
+    DartAnalyzeLogTypeEnum[DartAnalyzeLogTypeEnum["Warning"] = 2] = "Warning";
+    DartAnalyzeLogTypeEnum[DartAnalyzeLogTypeEnum["Error"] = 3] = "Error";
+})(DartAnalyzeLogTypeEnum = exports.DartAnalyzeLogTypeEnum || (exports.DartAnalyzeLogTypeEnum = {}));
+class DartAnalyzeLogType {
+    static typeFromKey(key) {
+        switch (key) {
+            case 'error':
+                return DartAnalyzeLogTypeEnum.Error;
+            case 'warning':
+                return DartAnalyzeLogTypeEnum.Warning;
+            default:
+                return DartAnalyzeLogTypeEnum.Info;
+        }
+    }
+    static keyFromType(logType) {
+        switch (logType) {
+            case DartAnalyzeLogTypeEnum.Error:
+                return 'error';
+            default:
+                return 'warning';
+        }
+    }
+    static isFail(logType) {
+        switch (FailOn_1.failOn) {
+            case FailOn_1.FailOn.Nothing:
+                return false;
+            case FailOn_1.FailOn.Info:
+                return true;
+            case FailOn_1.FailOn.Warning:
+                return logType === DartAnalyzeLogTypeEnum.Error || logType === DartAnalyzeLogTypeEnum.Warning;
+            case FailOn_1.FailOn.Error:
+            default:
+                return logType === DartAnalyzeLogTypeEnum.Error;
+        }
     }
 }
-exports.getDartAnalyzeLogType = getDartAnalyzeLogType;
-function getLogKey(logType) {
-    switch (logType) {
-        case DartAnalyzeLogType.Error:
-            return 'error';
-        default:
-            return 'warning';
-    }
-}
-exports.getLogKey = getLogKey;
+exports.DartAnalyzeLogType = DartAnalyzeLogType;
 
 
 /***/ }),
@@ -7154,7 +7168,7 @@ class ParsedLine {
         var _a, _b;
         this.originalLine = params.line;
         const lineData = params.line.split((_a = params === null || params === void 0 ? void 0 : params.delimiter) !== null && _a !== void 0 ? _a : '-');
-        this.type = DartAnalyzeLogType_1.getDartAnalyzeLogType(lineData[0].trim());
+        this.type = DartAnalyzeLogType_1.DartAnalyzeLogType.typeFromKey(lineData[0].trim());
         const lints = lineData[1].trim().split(' at ');
         const location = (_b = lints.pop()) === null || _b === void 0 ? void 0 : _b.trim();
         const lintMessage = lints.join(' at ').trim();
@@ -7172,16 +7186,15 @@ class ParsedLine {
         this.message = lintMessage;
     }
     get isFail() {
-        const failOn = FailOn_1.getFailOn();
-        if (failOn !== FailOn_1.FailOn.Nothing) {
-            if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogType.Error) {
+        if (FailOn_1.failOn !== FailOn_1.FailOn.Nothing) {
+            if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error) {
                 return true;
             }
-            if (failOn !== FailOn_1.FailOn.Error) {
-                if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogType.Warning) {
+            if (FailOn_1.failOn !== FailOn_1.FailOn.Error) {
+                if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning) {
                     return true;
                 }
-                if (failOn !== FailOn_1.FailOn.Warning) {
+                if (FailOn_1.failOn !== FailOn_1.FailOn.Warning) {
                     // It is FailOn.Info
                     return true;
                 }
@@ -7191,11 +7204,11 @@ class ParsedLine {
     }
     get emoji() {
         switch (this.type) {
-            case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error:
                 return ':bangbang:';
-            case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning:
                 return ':warning:';
-            case DartAnalyzeLogType_1.DartAnalyzeLogType.Info:
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info:
                 return ':eyes:';
         }
     }
@@ -7300,17 +7313,17 @@ function analyze(workingDirectory) {
                 }
                 const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.urls[0]}`;
                 switch (parsedLine.type) {
-                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
+                    case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error:
                         errorCount++;
                         break;
-                    case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
+                    case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning:
                         warningCount++;
                         break;
                     default:
                         infoCount++;
                         break;
                 }
-                console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`); // Log the issue
+                console.log(`::${DartAnalyzeLogType_1.DartAnalyzeLogType.keyFromType(parsedLine.type)} ${message}`); // Log the issue
             }
             catch (error) {
                 console.log(`Error analyzing line ${line}:\n${error}`);
@@ -7432,6 +7445,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Result = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 const Comment_1 = __nccwpck_require__(961);
 const FailOn_1 = __nccwpck_require__(1613);
 /**
@@ -7459,11 +7473,11 @@ class Result {
                     urls += ` or [link](${line.urls[1]})`;
                 }
                 let failEmoji = '';
-                const failOn = FailOn_1.getFailOn();
-                if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Info].includes(failOn)) {
+                if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Info].includes(FailOn_1.failOn)) {
                     failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
                 }
-                messages.push(`- ${failEmoji}${line.emoji} ${line.originalLine}. See ${urls}`);
+                const highlight = line.isFail ? '**' : '';
+                messages.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
             }
             yield Comment_1.comment({ message: messages.join('\n'), reacts: [this.react] });
         });
@@ -7475,8 +7489,16 @@ class Result {
         return '+1';
     }
     issueCountMessage(params) {
-        const messages = [];
-        const titleLine = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
+        const messages = [
+            this.title(params),
+            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error })),
+            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning })),
+            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info })),
+        ];
+        return messages.join('\n');
+    }
+    title(params) {
+        const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
         if (params === null || params === void 0 ? void 0 : params.emojis) {
             let emoji = ':tada:';
             if (this.analyze.counts.failCount) {
@@ -7485,26 +7507,38 @@ class Result {
             else if (this.analyze.counts.total) {
                 emoji = ':warning:';
             }
-            messages.push(`${emoji} ${titleLine}`);
+            return `${emoji} ${title}`;
         }
         else {
-            messages.push(titleLine);
+            return title;
         }
-        if (!!this.analyze.counts.total && ![FailOn_1.FailOn.Info, FailOn_1.FailOn.Nothing].includes(FailOn_1.getFailOn())) {
-            // Issues are found and there are some non failing logs and failing logs
-            const failCount = this.analyze.counts.failCount;
-            let firstLine = `${failCount} critical issue${Result.pluralS(failCount)}`;
-            if (params === null || params === void 0 ? void 0 : params.emojis) {
-                firstLine = `:${failCount ? 'x' : 'white_check_mark'}: ${firstLine}`;
-            }
-            let secondLine = `${this.analyze.counts.total - failCount} non failing issue${Result.pluralS(this.analyze.counts.failCount)}`;
-            if (params === null || params === void 0 ? void 0 : params.emojis) {
-                secondLine = `:${this.analyze.counts.total - failCount ? 'warning' : 'white_check_mark'}: ${secondLine}`;
-            }
-            messages.push(`- ${firstLine}`);
-            messages.push(`- ${secondLine}`);
+    }
+    titleLine(params) {
+        const isFail = DartAnalyzeLogType_1.DartAnalyzeLogType.isFail(params.type);
+        let emoji = '';
+        let count;
+        let line = '';
+        switch (params.type) {
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error:
+                count = this.analyze.counts.errors;
+                emoji = count ? 'x' : 'white_check_mark';
+                line = `${count} error${Result.pluralS(count)}`;
+                break;
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning:
+                count = this.analyze.counts.warnings;
+                emoji = count ? 'warning' : 'tada';
+                line = `${count} warning${Result.pluralS(count)}`;
+                break;
+            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info:
+                count = this.analyze.counts.info;
+                emoji = count ? 'eyes' : 'rocket';
+                line = `${count} info log${Result.pluralS(count)}`;
+                break;
         }
-        return messages.join('\n');
+        const highlight = isFail && params.emojis && count ? '**' : '';
+        emoji = `:${emoji}: `;
+        line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
+        return line;
     }
     /**
      * Log the results in the github action
@@ -7623,7 +7657,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getFailOn = exports.FailOn = void 0;
+exports.failOn = exports.FailOn = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 var FailOn;
 (function (FailOn) {
@@ -7632,6 +7666,7 @@ var FailOn;
     FailOn[FailOn["Error"] = 2] = "Error";
     FailOn[FailOn["Nothing"] = 3] = "Nothing";
 })(FailOn = exports.FailOn || (exports.FailOn = {}));
+exports.failOn = getFailOn();
 function getFailOn() {
     const input = core.getInput('fail-on');
     switch (input) {
@@ -7645,7 +7680,6 @@ function getFailOn() {
             return FailOn.Error;
     }
 }
-exports.getFailOn = getFailOn;
 
 
 /***/ }),

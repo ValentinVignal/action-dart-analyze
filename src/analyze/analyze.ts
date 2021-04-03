@@ -1,5 +1,5 @@
 import * as exec from '@actions/exec';
-import { DartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
+import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from './DartAnalyzeLogType';
 import { AnalyzeResult } from './AnalyzeResult';
 import { ParsedLine } from './ParsedLine';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
@@ -68,17 +68,17 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
       const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.urls[0]}`;
 
       switch(parsedLine.type) {
-        case DartAnalyzeLogType.Error:
+        case DartAnalyzeLogTypeEnum.Error:
           errorCount++;
           break;
-        case DartAnalyzeLogType.Warning:
+        case DartAnalyzeLogTypeEnum.Warning:
           warningCount++;
           break;
         default:
           infoCount++;
           break;
       }
-      console.log(`::${getLogKey(parsedLine.type)} ${message}`); // Log the issue
+      console.log(`::${DartAnalyzeLogType.keyFromType(parsedLine.type)} ${message}`); // Log the issue
 
     } catch (error) {
       console.log(`Error analyzing line ${line}:\n${error}`);

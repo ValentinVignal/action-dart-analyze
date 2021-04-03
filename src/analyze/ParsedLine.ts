@@ -1,5 +1,5 @@
-import { FailOn, getFailOn } from "../utils/FailOn";
-import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType } from "./DartAnalyzeLogType";
+import { failOn, FailOn } from "../utils/FailOn";
+import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum, DartAnalyzeLogTypeKey,} from "./DartAnalyzeLogType";
 
 export interface ParsedLineInterface {
   file: string;
@@ -7,7 +7,7 @@ export interface ParsedLineInterface {
   column: number;
   message: string;
   url: string;
-  type: DartAnalyzeLogType
+  type: DartAnalyzeLogTypeEnum
   originalLine: string;
 }
 
@@ -17,13 +17,13 @@ export class ParsedLine {
   readonly column: number;
   readonly message: string;
   readonly urls: [string] | [string, string];
-  readonly type: DartAnalyzeLogType
+  readonly type: DartAnalyzeLogTypeEnum
   readonly originalLine: string;
 
   constructor(params: {line: string, delimiter?: string}) {
       this.originalLine = params.line;
       const lineData = params.line.split(params?.delimiter?? '-');
-      this.type = getDartAnalyzeLogType(lineData[0].trim() as DartAnalyzeLogTypeKey);
+      this.type = DartAnalyzeLogType.typeFromKey(lineData[0].trim() as DartAnalyzeLogTypeKey);
       const lints = lineData[1].trim().split(' at ');
       const location = lints.pop()?.trim()!;
       const lintMessage = lints.join(' at ').trim();
@@ -42,13 +42,12 @@ export class ParsedLine {
   }
 
   public get isFail():boolean {
-    const failOn = getFailOn();
     if (failOn !== FailOn.Nothing){
-      if (this.type === DartAnalyzeLogType.Error) {
+      if (this.type === DartAnalyzeLogTypeEnum.Error) {
         return true;
       }
       if (failOn !== FailOn.Error) {
-        if (this.type === DartAnalyzeLogType.Warning) {
+        if (this.type === DartAnalyzeLogTypeEnum.Warning) {
           return true;
         }
         if (failOn !== FailOn.Warning) {
@@ -62,11 +61,11 @@ export class ParsedLine {
 
   public get emoji(): string {
     switch(this.type) {
-      case DartAnalyzeLogType.Error:
+      case DartAnalyzeLogTypeEnum.Error:
         return ':bangbang:';
-      case DartAnalyzeLogType.Warning:
+      case DartAnalyzeLogTypeEnum.Warning:
         return ':warning:'
-      case DartAnalyzeLogType.Info:
+      case DartAnalyzeLogTypeEnum.Info:
         return ':eyes:'
     }
   }

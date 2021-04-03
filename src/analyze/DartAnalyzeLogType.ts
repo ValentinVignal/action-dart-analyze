@@ -1,4 +1,6 @@
-export enum DartAnalyzeLogType{
+import { FailOn, failOn } from "../utils/FailOn";
+
+export enum DartAnalyzeLogTypeEnum{
   Info = 1,
   Warning = 2,
   Error = 3,
@@ -8,23 +10,41 @@ export type DartAnalyzeLogTypeKey = 'info'|'warning'|'error';
 
 export type LogKey = 'warning'|'error';
 
-export function getDartAnalyzeLogType(key: DartAnalyzeLogTypeKey): DartAnalyzeLogType {
-  switch(key) {
-    case 'error':
-      return DartAnalyzeLogType.Error;
-    case 'warning':
-      return DartAnalyzeLogType.Warning;
-    default:
-      return DartAnalyzeLogType.Info;
+export class DartAnalyzeLogType {
+  public static typeFromKey(key: DartAnalyzeLogTypeKey): DartAnalyzeLogTypeEnum {
+    switch(key) {
+      case 'error':
+        return DartAnalyzeLogTypeEnum.Error;
+      case 'warning':
+        return DartAnalyzeLogTypeEnum.Warning;
+      default:
+        return DartAnalyzeLogTypeEnum.Info;
+    }
+  }
+
+  public static keyFromType(logType: DartAnalyzeLogTypeEnum): LogKey {
+    switch (logType) {
+      case DartAnalyzeLogTypeEnum.Error:
+        return 'error';
+      default:
+        return 'warning';
+    }
+  }
+
+  public static isFail(logType: DartAnalyzeLogTypeEnum): boolean {
+    switch (failOn) {
+      case FailOn.Nothing:
+        return false;
+      case FailOn.Info:
+        return true;
+      case FailOn.Warning:
+        return logType === DartAnalyzeLogTypeEnum.Error || logType === DartAnalyzeLogTypeEnum.Warning;
+      case FailOn.Error:
+      default:
+        return logType === DartAnalyzeLogTypeEnum.Error;
+    }
   }
 }
 
 
-export function getLogKey(logType: DartAnalyzeLogType): LogKey {
-  switch (logType) {
-    case DartAnalyzeLogType.Error:
-      return 'error';
-    default:
-      return 'warning';
-  }
-}
+
