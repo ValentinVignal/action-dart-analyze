@@ -7106,6 +7106,7 @@ function analyze(workingDirectory) {
             // dart analyze sometimes fails
         }
         const modifiedFiles = yield ModifiedFiles_1.getModifiedFiles();
+        console.log('modifiedFiles', modifiedFiles);
         const modifiedFilesMap = new Map();
         for (const modifiedFile of modifiedFiles) {
             modifiedFilesMap.set(modifiedFile.name, modifiedFile);
@@ -7123,6 +7124,7 @@ function analyze(workingDirectory) {
             }
             try {
                 const parsedLine = parseLine(line, delimiter);
+                console.log('parsedLine', parseLine);
                 if (!modifiedFilesMap.has(parsedLine.file)) {
                     // Don't lint anything if the file is not part of the changes
                     continue;
@@ -7151,7 +7153,9 @@ function analyze(workingDirectory) {
                 }
                 console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`); // Log the issue
             }
-            catch (_) { }
+            catch (error) {
+                console.log(`Error analyzing line ${line}:\n${error}`);
+            }
         }
         console.log('::endgroup::');
         return {

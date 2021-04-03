@@ -38,6 +38,8 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
 
   const modifiedFiles = await getModifiedFiles();
 
+  console.log('modifiedFiles', modifiedFiles);
+
   const modifiedFilesMap = new Map<ModifiedFile['name'], ModifiedFile>();
   for (const modifiedFile of modifiedFiles) {
     modifiedFilesMap.set(modifiedFile.name, modifiedFile);
@@ -58,6 +60,7 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
     }
     try {
       const parsedLine = parseLine(line, delimiter);
+      console.log('parsedLine', parseLine);
       if (!modifiedFilesMap.has(parsedLine.file)) {
         // Don't lint anything if the file is not part of the changes
         continue
@@ -89,7 +92,9 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
       }
       console.log(`::${getLogKey(parsedLine.type)} ${message}`); // Log the issue
 
-    } catch (_) {}
+    } catch (error) {
+      console.log(`Error analyzing line ${line}:\n${error}`);
+    }
   } 
   console.log('::endgroup::');
 
