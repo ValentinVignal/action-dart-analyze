@@ -7147,6 +7147,7 @@ exports.getLogKey = getLogKey;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ParsedLine = void 0;
+const FailOn_1 = __nccwpck_require__(1613);
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 class ParsedLine {
     constructor(params) {
@@ -7160,13 +7161,43 @@ class ParsedLine {
         const [file, lineNumber, columnNumber] = location.split(':');
         const lintName = lineData[2].replace(/[\W]+/g, '');
         const lintNameLowerCase = lintName.toLowerCase();
-        this.url = lintName === lintNameLowerCase
-            ? `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`
-            : `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`;
+        let urls = [`https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`];
+        if (lintName === lintNameLowerCase) {
+            urls = [`https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`, ...urls];
+        }
+        this.urls = urls;
         this.file = file;
         this.line = parseInt(lineNumber);
         this.column = parseInt(columnNumber);
         this.message = lintMessage;
+    }
+    get isFail() {
+        const failOn = FailOn_1.getFailOn();
+        if (failOn !== FailOn_1.FailOn.Nothing) {
+            if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogType.Error) {
+                return true;
+            }
+            if (failOn !== FailOn_1.FailOn.Error) {
+                if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogType.Warning) {
+                    return true;
+                }
+                if (failOn !== FailOn_1.FailOn.Warning) {
+                    // It is FailOn.Info
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    get emoji() {
+        switch (this.type) {
+            case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
+                return ':bangbang:';
+            case DartAnalyzeLogType_1.DartAnalyzeLogType.Warning:
+                return ':warning:';
+            case DartAnalyzeLogType_1.DartAnalyzeLogType.Info:
+                return ':eyes:';
+        }
     }
 }
 exports.ParsedLine = ParsedLine;
@@ -7263,7 +7294,11 @@ function analyze(workingDirectory) {
                     continue;
                 }
                 parsedLines.push(parsedLine);
-                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
+                let urls = parsedLine.urls[0];
+                if (urls.length > 1) {
+                    urls += `or ${urls[1]}`;
+                }
+                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.urls[0]}`;
                 switch (parsedLine.type) {
                     case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
                         errorCount++;
@@ -7346,7 +7381,9 @@ function main() {
             const result = new Result_1.Result({
                 analyze: analyzeResult,
             });
-            yield result.comment();
+            if (!result.success) {
+                yield result.comment();
+            }
             result.log();
         }
         catch (error) {
@@ -7404,17 +7441,29 @@ class Result {
     constructor(params) {
         this.analyze = params.analyze;
     }
+    get success() {
+        return this.analyze.isSuccess;
+    }
     /**
      * Put a comment on the PR
      */
     comment() {
         return __awaiter(this, void 0, void 0, function* () {
             const messages = [
-                this.issueCountMessage()
+                this.issueCountMessage({ emojis: true })
             ];
             messages.push('\n---\n');
             for (const line of this.analyze.lines) {
-                messages.push(`- ${line.originalLine}. [See](${line.url})`);
+                let urls = `[link](${line.urls[0]})`;
+                if (line.urls.length > 1) {
+                    urls += ` or [link](${line.urls[1]})`;
+                }
+                let failEmoji = '';
+                const failOn = FailOn_1.getFailOn();
+                if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Info].includes(failOn)) {
+                    failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
+                }
+                messages.push(`- ${failEmoji}${line.emoji} ${line.originalLine}. See ${urls}`);
             }
             yield Comment_1.comment({ message: messages.join('\n'), reacts: [this.react] });
         });
@@ -7425,15 +7474,35 @@ class Result {
     get react() {
         return '+1';
     }
-    issueCountMessage() {
-        const messages = [
-            `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`,
-        ];
+    issueCountMessage(params) {
+        const messages = [];
+        const titleLine = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
+        if (params === null || params === void 0 ? void 0 : params.emojis) {
+            let emoji = ':tada:';
+            if (this.analyze.counts.failCount) {
+                emoji = ':x:';
+            }
+            else if (this.analyze.counts.total) {
+                emoji = ':warning:';
+            }
+            messages.push(`${emoji} ${titleLine}`);
+        }
+        else {
+            messages.push(titleLine);
+        }
         if (!!this.analyze.counts.total && ![FailOn_1.FailOn.Info, FailOn_1.FailOn.Nothing].includes(FailOn_1.getFailOn())) {
             // Issues are found and there are some non failing logs and failing logs
             const failCount = this.analyze.counts.failCount;
-            messages.push(`- ${failCount} critical issue${Result.pluralS(failCount)}`);
-            messages.push(`- ${this.analyze.counts.total - failCount} non failing issue${Result.pluralS(this.analyze.counts.failCount)}`);
+            let firstLine = `${failCount} critical issue${Result.pluralS(failCount)}`;
+            if (params === null || params === void 0 ? void 0 : params.emojis) {
+                firstLine = `:${failCount ? 'x' : 'white_check_mark'}: ${firstLine}`;
+            }
+            let secondLine = `${this.analyze.counts.total - failCount} non failing issue${Result.pluralS(this.analyze.counts.failCount)}`;
+            if (params === null || params === void 0 ? void 0 : params.emojis) {
+                secondLine = `:${this.analyze.counts.total - failCount ? 'warning' : 'white_check_mark'}: ${secondLine}`;
+            }
+            messages.push(`- ${firstLine}`);
+            messages.push(`- ${secondLine}`);
         }
         return messages.join('\n');
     }
@@ -7441,18 +7510,14 @@ class Result {
      * Log the results in the github action
      */
     log() {
-        const logger = this.analyze.isSuccess ? core.warning : core.setFailed;
+        const logger = this.success ? core.warning : core.setFailed;
         logger(this.issueCountMessage());
-    }
-    static indent(times) {
-        return ' '.repeat(times * Result.githubIndentation);
     }
     static pluralS(count) {
         return count > 1 ? 's' : '';
     }
 }
 exports.Result = Result;
-Result.githubIndentation = 2;
 
 
 /***/ }),
@@ -7496,6 +7561,7 @@ const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(3030);
 function comment(params) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (!github.context.payload.pull_request) {
             // Can only comment on Pull Requests
@@ -7508,9 +7574,10 @@ function comment(params) {
             if (params.reacts) {
                 for (const react of params.reacts) {
                     try {
+                        const [owner, repo] = (_a = process.env.GITHUB_REPOSITORY) === null || _a === void 0 ? void 0 : _a.split('/');
                         yield octokit.reactions.createForCommitComment({
-                            owner: utils_1.context.repo.owner,
-                            repo: utils_1.context.repo.repo,
+                            owner: owner,
+                            repo: repo,
                             comment_id: comment.data.id,
                             content: react,
                         });

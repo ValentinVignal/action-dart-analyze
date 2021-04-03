@@ -22,9 +22,10 @@ export async function comment(params: {message: string, reacts?: CommentReact[]}
     if (params.reacts) {
       for (const react of params.reacts) {
         try {
+          const [owner, repo] = process.env.GITHUB_REPOSITORY?.split('/') as [string, string];
           await octokit.reactions.createForCommitComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: owner,
+            repo: repo,
             comment_id: comment.data.id,
             content: react,
           });

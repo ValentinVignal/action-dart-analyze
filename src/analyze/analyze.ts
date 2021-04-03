@@ -61,7 +61,11 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
       }
 
       parsedLines.push(parsedLine);
-      const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
+      let urls = parsedLine.urls[0];
+      if (urls.length > 1) {
+        urls += `or ${urls[1]}`;
+      }
+      const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.urls[0]}`;
 
       switch(parsedLine.type) {
         case DartAnalyzeLogType.Error:

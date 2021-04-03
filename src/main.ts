@@ -17,7 +17,9 @@ async function main(): Promise<void> {
       analyze: analyzeResult,
     });
 
-    await result.comment();
+    if (!result.success) {
+      await result.comment();
+    }
     result.log();
   } catch (error) {
     core.setFailed(`error: ${error.message}`);
