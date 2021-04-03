@@ -7116,6 +7116,7 @@ function analyze(workingDirectory) {
         const lines = outputs.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const delimiter = '-';
+        const parsedLines = [];
         for (const line of [...lines, ...errLines]) {
             if (!line.includes(delimiter)) {
                 continue;
@@ -7135,7 +7136,8 @@ function analyze(workingDirectory) {
                     // Don't lint if the issue doesn't belong to the additions
                     continue;
                 }
-                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message} [See](${parsedLine.url})`;
+                parsedLines.push(parsedLine);
+                const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
                 switch (parsedLine.type) {
                     case DartAnalyzeLogType_1.DartAnalyzeLogType.Error:
                         errorCount++;
@@ -7147,12 +7149,19 @@ function analyze(workingDirectory) {
                         infoCount++;
                         break;
                 }
-                console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`);
+                console.log(`::${DartAnalyzeLogType_1.getLogKey(parsedLine.type)} ${message}`); // Log the issue
             }
             catch (_) { }
         }
         console.log('::endgroup::');
-        return [errorCount, warningCount, infoCount];
+        return {
+            counts: {
+                info: infoCount,
+                warnings: warningCount,
+                errors: errorCount,
+            },
+            lines: parsedLines,
+        };
     });
 }
 exports.analyze = analyze;
@@ -7185,6 +7194,80 @@ function parseLine(line, delimiter) {
         type: logType,
     };
 }
+
+
+/***/ }),
+
+/***/ 129:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.comment = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
+const utils_1 = __nccwpck_require__(3030);
+function comment(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!github.context.payload.pull_request) {
+            // Can only comment on Pull Requests
+            return;
+        }
+        const octokit = github.getOctokit(core.getInput('token', { required: true }));
+        // Create the comment
+        try {
+            const comment = yield octokit.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: utils_1.context.payload.pull_request.number, body: params.message }));
+            if (params.reacts) {
+                for (const react of params.reacts) {
+                    try {
+                        yield octokit.reactions.createForCommitComment({
+                            owner: utils_1.context.repo.owner,
+                            repo: utils_1.context.repo.repo,
+                            comment_id: comment.data.id,
+                            content: react,
+                        });
+                    }
+                    catch (error) {
+                        console.log(`Couldn't react :${react}: on ${comment.data.id}:\n${error}`);
+                    }
+                }
+            }
+        }
+        catch (error) {
+            console.log(`Couldn't comment "${params.message} with reacts ${params.reacts}`);
+        }
+    });
+}
+exports.comment = comment;
 
 
 /***/ }),
@@ -7354,9 +7437,7 @@ function getModifiedFiles() {
                 "Please submit an issue on this action's GitHub repo.");
         }
         const files = response.data.files;
-        return files.map((file) => {
-            return parseFile(file);
-        });
+        return files.map(parseFile);
     });
 }
 exports.getModifiedFiles = getModifiedFiles;
@@ -7369,12 +7450,12 @@ function parseFile(file) {
         // The changes are included in the file
         const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
         for (const patch of patches) {
-            // path is usually like " -6,7 +6,8"
+            // patch is usually like " -6,7 +6,8"
             try {
                 const hasAddition = patch.includes('+');
                 const hasDeletion = patch.includes('-');
                 if (hasAddition) {
-                    const lines = patch.match(/\+.*/)[0].trim().slice(1).split(',').map((num) => parseInt(num));
+                    const lines = patch.match(/\+.*/)[0].trim().slice(1).split(',').map(parseInt);
                     (_a = modifiedFile.addition) !== null && _a !== void 0 ? _a : (modifiedFile.addition = []);
                     (_b = modifiedFile.addition) === null || _b === void 0 ? void 0 : _b.push({
                         start: lines[0],
@@ -7382,7 +7463,7 @@ function parseFile(file) {
                     });
                 }
                 if (hasDeletion) {
-                    const lines = patch.split('+')[0].trim().slice(1).split(',').map((num) => parseInt(num));
+                    const lines = patch.split('+')[0].trim().slice(1).split(',').map(parseInt);
                     (_c = modifiedFile.deletion) !== null && _c !== void 0 ? _c : (modifiedFile.deletion = []);
                     (_d = modifiedFile.deletion) === null || _d === void 0 ? void 0 : _d.push({
                         start: lines[0],
@@ -7449,6 +7530,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
 const Analyze_1 = __nccwpck_require__(2731);
+const Comment_1 = __nccwpck_require__(129);
 const FailOn_1 = __nccwpck_require__(9424);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -7457,43 +7539,55 @@ function main() {
             if (!workingDirectory) {
                 workingDirectory = './';
             }
-            const [analyzeErrorCount, analyzeWarningCount, analyzeInfoCount] = yield Analyze_1.analyze(workingDirectory);
-            const failOn = FailOn_1.getFailOn();
+            const analyzeResult = yield Analyze_1.analyze(workingDirectory);
             // const formatWarningCount = await format(workingDirectory);
-            const issueCount = analyzeErrorCount + analyzeWarningCount + analyzeInfoCount; // + formatWarningCount;
-            const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
-            switch (failOn) {
-                case FailOn_1.FailOn.Nothing:
-                    core.warning(message);
-                    break;
-                case FailOn_1.FailOn.Error:
-                    if (analyzeErrorCount) {
-                        core.setFailed(message);
-                    }
-                    else {
-                        core.warning(message);
-                    }
-                    break;
-                case FailOn_1.FailOn.Warning:
-                    if (analyzeErrorCount + analyzeWarningCount) {
-                        core.setFailed(message);
-                    }
-                    else {
-                        core.warning(message);
-                    }
-                    break;
-                case FailOn_1.FailOn.Info:
-                    if (analyzeErrorCount + analyzeWarningCount + analyzeInfoCount) {
-                        core.setFailed(message);
-                    }
-                    else {
-                        core.warning(message);
-                    }
-            }
+            const success = isSuccess(analyzeResult);
+            yield logResult({ success, result: analyzeResult });
         }
         catch (error) {
             core.setFailed(`error: ${error.message}`);
         }
+    });
+}
+function isSuccess(result) {
+    const failOn = FailOn_1.getFailOn();
+    switch (failOn) {
+        case FailOn_1.FailOn.Nothing:
+            return true;
+        // core.warning(message);
+        // break;
+        case FailOn_1.FailOn.Error:
+            return !!result.counts.errors;
+        // if (result.counts.errors) {
+        //   core.setFailed(message);
+        // } else {
+        //   core.warning(message);
+        // }
+        // break;
+        case FailOn_1.FailOn.Warning:
+            return !!(result.counts.errors + result.counts.info);
+        // if (result.counts.errors + result.counts.info) {
+        //   core.setFailed(message);
+        // } else {
+        //   core.warning(message);
+        // }
+        // break;
+        case FailOn_1.FailOn.Info:
+            return !!(result.counts.errors + result.counts.warnings + result.counts.info);
+        // if (result.counts.errors + result.counts.warnings + result.counts.info) {
+        //   core.setFailed(params.message);
+        // } else {
+        //   core.warning(params.message);
+        // }
+    }
+}
+function logResult(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const issueCount = params.result.counts.info + params.result.counts.warnings + params.result.counts.errors; // + formatWarningCount;
+        const message = `${issueCount} issue${issueCount === 1 ? '' : 's'} found.`;
+        yield Comment_1.comment({ message });
+        const logger = params.success ? core.warning : core.setFailed;
+        logger(message);
     });
 }
 main();

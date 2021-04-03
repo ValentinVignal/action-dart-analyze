@@ -2,7 +2,16 @@ import * as exec from '@actions/exec';
 import { DartAnalyzeLogType, DartAnalyzeLogTypeKey, getDartAnalyzeLogType, getLogKey } from './DartAnalyzeLogType';
 import { getModifiedFiles, ModifiedFile } from './ModifiedFiles';
 
-export async function analyze(workingDirectory: string): Promise<[number, number, number]> {
+export interface AnalyzeResult {
+  counts: {
+    info: number;
+    warnings: number;
+    errors: number;
+  };
+  lines: ParsedLine[]; 
+}
+
+export async function analyze(workingDirectory: string): Promise<AnalyzeResult> {
   let outputs = '';
   let errOutputs = '';
 
@@ -41,6 +50,8 @@ export async function analyze(workingDirectory: string): Promise<[number, number
   const errLines = errOutputs.trim().split(/\r?\n/);
   const delimiter = '-';
 
+  const parsedLines: ParsedLine[] = [];
+
   for (const line of [...lines, ...errLines]) {
     if (!line.includes(delimiter)) {
       continue;
@@ -60,8 +71,10 @@ export async function analyze(workingDirectory: string): Promise<[number, number
         // Don't lint if the issue doesn't belong to the additions
         continue;
       }
-      
-      const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message} [See](${parsedLine.url})`;
+
+
+      parsedLines.push(parsedLine);
+      const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.url}`;
 
       switch(parsedLine.type) {
         case DartAnalyzeLogType.Error:
@@ -74,13 +87,20 @@ export async function analyze(workingDirectory: string): Promise<[number, number
           infoCount++;
           break;
       }
-      console.log(`::${getLogKey(parsedLine.type)} ${message}`);
+      console.log(`::${getLogKey(parsedLine.type)} ${message}`); // Log the issue
 
     } catch (_) {}
   } 
   console.log('::endgroup::');
 
-  return [errorCount, warningCount, infoCount];
+  return {
+    counts: {
+      info: infoCount,
+      warnings: warningCount,
+      errors: errorCount,
+    },
+    lines: parsedLines,
+  };
 }
 
 interface ParsedLine {

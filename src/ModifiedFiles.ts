@@ -63,9 +63,7 @@ export async function getModifiedFiles(): Promise<ModifiedFile[]> {
 
   const files = response.data.files;
 
-  return files.map((file) => {
-    return parseFile(file);
-  });
+  return files.map(parseFile);
 }
 
 function parseFile(file: {filename: string, patch?: string|undefined}): ModifiedFile {
@@ -76,12 +74,12 @@ function parseFile(file: {filename: string, patch?: string|undefined}): Modified
     // The changes are included in the file
     const patches = file.patch.split('@@').filter((_, index) => index % 2); // Only take the line information
     for (const patch of patches) {
-      // path is usually like " -6,7 +6,8"
+      // patch is usually like " -6,7 +6,8"
       try {
         const hasAddition = patch.includes('+');
         const hasDeletion = patch.includes('-');
         if (hasAddition) {
-          const lines = patch.match(/\+.*/)![0].trim().slice(1).split(',').map((num) => parseInt(num)) as [number, number];
+          const lines = patch.match(/\+.*/)![0].trim().slice(1).split(',').map(parseInt) as [number, number];
           modifiedFile.addition ??= [];
           modifiedFile.addition?.push({
             start: lines[0],
@@ -90,7 +88,7 @@ function parseFile(file: {filename: string, patch?: string|undefined}): Modified
         }
         if (hasDeletion) {
 
-          const lines = patch.split('+')[0].trim().slice(1).split(',').map((num) => parseInt(num)) as [number, number];
+          const lines = patch.split('+')[0].trim().slice(1).split(',').map(parseInt) as [number, number];
           modifiedFile.deletion ??= [];
           modifiedFile.deletion?.push({
             start: lines[0],

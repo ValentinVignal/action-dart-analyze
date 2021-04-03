@@ -1,31 +1,40 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
+import { context } from '@actions/github/lib/utils';
 
-export class Comment {
-  private static _githubToken: string;
-  private static get githubToken(): string {
-    if(!Comment._githubToken) {
-      try {
-        Comment._githubToken = process.env.GITHUB_TOKEN!;
-      } catch (error) {
-        core.setFailed(`Could not find env variable GITHUB_TOKEN, have you set it up?`);
+export type CommentReact = '+1'|'-1'|'laugh'|'confused'|'heart'|'hooray'|'rocket'|'eyes';
+
+export async function comment(params: {message: string, reacts?: CommentReact[]}): Promise<void> {
+
+  if (!github.context.payload.pull_request) {
+    // Can only comment on Pull Requests
+    return;
+  }
+  const octokit = github.getOctokit(core.getInput('token', {required: true}));
+
+  // Create the comment
+  try {
+    const comment = await octokit.issues.createComment({
+      ...github.context.repo,
+      issue_number: context.payload.pull_request!.number,
+      body: params.message,
+    });
+    if (params.reacts) {
+      for (const react of params.reacts) {
+        try {
+          await octokit.reactions.createForCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            comment_id: comment.data.id,
+            content: react,
+          });
+        } catch (error) {
+          console.log(`Couldn't react :${react}: on ${comment.data.id}:\n${error}`);
+        }
       }
     }
-    return Comment._githubToken;
-  }
-
-  public static createComment(comment: string): void {
-    const context = github.context;
-    const octokit = github.getOctokit(Comment.githubToken);
-    const pullRequestNumber = context.payload.pull_request!.number;
-
-    const newComment = octokit.issues.createComment({
-      ...context.repo,
-      issue_number: pullRequestNumber,
-      body: comment,
-      
-    });
-  }
-
-
+  } catch (error) {
+    console.log(`Couldn't comment "${params.message} with reacts ${params.reacts}`);
+  } 
 }
+
