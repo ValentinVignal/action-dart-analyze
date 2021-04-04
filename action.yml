@@ -3,7 +3,7 @@ description: 'Analyze a dart code'
 author: 'Valentin Vignal'
 inputs:
   fail-on:
-    description: 'When the action will fail. Optional. Option: `nothing`, `error`, `warning`, `info`. Default: `false`.'
+    description: 'When the action will fail. Optional. Option: `error`, `warning`, `info`, `format`, `nothing`. Default: `error`.'
     default: 'error'
     required: false
   working-directory:
@@ -14,6 +14,10 @@ inputs:
     description: 'The github token'
     required: false
     default: ${{ github.token }}
+  check-renamed-files:
+    description: 'Whether it should check the renamed files with no changes'
+    required: false
+    default: 'false'
 
 runs:
   using: 'node12'

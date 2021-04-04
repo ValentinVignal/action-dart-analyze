@@ -61,12 +61,31 @@ export class AnalyzeResult {
   }
 
   // Whether it is a success (not failing results)
-  public get isSuccess(): boolean {
+  public get success(): boolean {
     return !this.counts.failCount
   }
 
   // Whether it has logs (even not failing ones)
   public get hasWarning(): boolean {
     return !!this.counts.total;
+  }
+
+  public get commentBody(): string {
+    const comments: string[] = [];
+
+    for (const line of this.lines) {
+      let urls = `[link](${line.urls[0]})`;
+      if (line.urls.length > 1) {
+        urls += ` or [link](${line.urls[1]})`
+      }
+      let failEmoji = '';
+      if (![FailOn.Nothing, FailOn.Format, FailOn.Info].includes(failOn)) {
+        failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
+      }
+      
+      const highlight = line.isFail ? '**': '';
+      comments.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+    }
+    return comments.join('\n');
   }
 }

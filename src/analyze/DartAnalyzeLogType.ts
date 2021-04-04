@@ -35,6 +35,8 @@ export class DartAnalyzeLogType {
     switch (failOn) {
       case FailOn.Nothing:
         return false;
+      case FailOn.Format:
+        return false;
       case FailOn.Info:
         return true;
       case FailOn.Warning:

@@ -7089,12 +7089,28 @@ class AnalyzeResult {
         this.lines = params.lines;
     }
     // Whether it is a success (not failing results)
-    get isSuccess() {
+    get success() {
         return !this.counts.failCount;
     }
     // Whether it has logs (even not failing ones)
     get hasWarning() {
         return !!this.counts.total;
+    }
+    get commentBody() {
+        const comments = [];
+        for (const line of this.lines) {
+            let urls = `[link](${line.urls[0]})`;
+            if (line.urls.length > 1) {
+                urls += ` or [link](${line.urls[1]})`;
+            }
+            let failEmoji = '';
+            if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Format, FailOn_1.FailOn.Info].includes(FailOn_1.failOn)) {
+                failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
+            }
+            const highlight = line.isFail ? '**' : '';
+            comments.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+        }
+        return comments.join('\n');
     }
 }
 exports.AnalyzeResult = AnalyzeResult;
@@ -7138,6 +7154,8 @@ class DartAnalyzeLogType {
     static isFail(logType) {
         switch (FailOn_1.failOn) {
             case FailOn_1.FailOn.Nothing:
+                return false;
+            case FailOn_1.FailOn.Format:
                 return false;
             case FailOn_1.FailOn.Info:
                 return true;
@@ -7257,13 +7275,12 @@ const exec = __importStar(__nccwpck_require__(1514));
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 const AnalyzeResult_1 = __nccwpck_require__(4896);
 const ParsedLine_1 = __nccwpck_require__(1738);
-const ModifiedFiles_1 = __nccwpck_require__(8445);
-function analyze(workingDirectory) {
+function analyze(params) {
     return __awaiter(this, void 0, void 0, function* () {
         let outputs = '';
         let errOutputs = '';
         console.log('::group:: Analyze dart code');
-        const options = { cwd: workingDirectory };
+        const options = { cwd: params.workingDirectory };
         options.listeners = {
             stdout: (data) => {
                 outputs += data.toString();
@@ -7272,15 +7289,13 @@ function analyze(workingDirectory) {
                 errOutputs += data.toString();
             }
         };
-        const args = [workingDirectory];
+        const args = [params.workingDirectory];
         try {
             yield exec.exec('dart analyze', args, options);
         }
         catch (_) {
             // dart analyze sometimes fails
         }
-        const modifiedFiles = new ModifiedFiles_1.ModifiedFiles();
-        yield modifiedFiles.isInit;
         let errorCount = 0;
         let warningCount = 0;
         let infoCount = 0;
@@ -7297,11 +7312,11 @@ function analyze(workingDirectory) {
                     line,
                     delimiter,
                 });
-                if (!modifiedFiles.has(parsedLine.file)) {
+                if (!params.modifiedFiles.has(parsedLine.file)) {
                     // Don't lint anything if the file is not part of the changes
                     continue;
                 }
-                const modifiedFile = modifiedFiles.get(parsedLine.file);
+                const modifiedFile = params.modifiedFiles.get(parsedLine.file);
                 if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
                     // Don't lint if the issue doesn't belong to the additions
                     continue;
@@ -7345,6 +7360,116 @@ exports.analyze = analyze;
 
 /***/ }),
 
+/***/ 9564:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.format = void 0;
+const exec = __importStar(__nccwpck_require__(1514));
+const FormatResult_1 = __nccwpck_require__(6290);
+function format(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let output = '';
+        let errOutputs = '';
+        const options = { cwd: params.workingDirectory };
+        options.listeners = {
+            stdout: (data) => {
+                output += data.toString();
+            },
+            stderr: (data) => {
+                errOutputs += data.toString();
+            }
+        };
+        try {
+            yield exec.exec('dart format');
+        }
+        catch (_) {
+        }
+        const args = ['-o none', '.'];
+        yield exec.exec('dart format', args, options);
+        const lines = output.trim().split(/\r?\n/);
+        const errLines = errOutputs.trim().split(/\r?\n/);
+        const fileNotFormatted = new Set();
+        for (const line of [...lines, ...errLines]) {
+            if (!line.startsWith('Changed')) {
+                continue;
+            }
+            const file = line.split(' ')[1];
+            if (params.modifiedFiles.has(file)) {
+                fileNotFormatted.add(file);
+            }
+        }
+        return new FormatResult_1.FormatResult({
+            files: fileNotFormatted,
+        });
+    });
+}
+exports.format = format;
+
+
+/***/ }),
+
+/***/ 6290:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FormatResult = void 0;
+const FailOn_1 = __nccwpck_require__(1613);
+class FormatResult {
+    constructor(params) {
+        this.files = params.files;
+    }
+    get success() {
+        return FailOn_1.failOn !== FailOn_1.FailOn.Format || !this.files.size;
+    }
+    get count() {
+        return this.files.size;
+    }
+    get commentBody() {
+        const comments = [];
+        for (const file of this.files) {
+            comments.push(`- [ ] :poop:  \`${file}\` is not formatted`);
+        }
+        return comments.join('\n');
+    }
+}
+exports.FormatResult = FormatResult;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7382,7 +7507,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
 const analyze_1 = __nccwpck_require__(115);
+const Format_1 = __nccwpck_require__(9564);
 const Result_1 = __nccwpck_require__(6529);
+const ModifiedFiles_1 = __nccwpck_require__(8445);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -7390,9 +7517,19 @@ function main() {
             if (!workingDirectory) {
                 workingDirectory = './';
             }
-            const analyzeResult = yield analyze_1.analyze(workingDirectory);
+            const modifiedFiles = new ModifiedFiles_1.ModifiedFiles();
+            yield modifiedFiles.isInit;
+            const analyzeResult = yield analyze_1.analyze({
+                workingDirectory,
+                modifiedFiles,
+            });
+            const formatResult = yield Format_1.format({
+                workingDirectory,
+                modifiedFiles,
+            });
             const result = new Result_1.Result({
                 analyze: analyzeResult,
+                format: formatResult,
             });
             if (!result.success) {
                 yield result.comment();
@@ -7447,16 +7584,16 @@ exports.Result = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 const Comment_1 = __nccwpck_require__(961);
-const FailOn_1 = __nccwpck_require__(1613);
 /**
  * Handle and summarize the results
  */
 class Result {
     constructor(params) {
         this.analyze = params.analyze;
+        this.format = params.format;
     }
     get success() {
-        return this.analyze.isSuccess;
+        return this.analyze.success && this.format.success;
     }
     /**
      * Put a comment on the PR
@@ -7466,34 +7603,24 @@ class Result {
             const messages = [
                 this.issueCountMessage({ emojis: true })
             ];
-            messages.push('\n---\n');
-            for (const line of this.analyze.lines) {
-                let urls = `[link](${line.urls[0]})`;
-                if (line.urls.length > 1) {
-                    urls += ` or [link](${line.urls[1]})`;
-                }
-                let failEmoji = '';
-                if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Info].includes(FailOn_1.failOn)) {
-                    failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
-                }
-                const highlight = line.isFail ? '**' : '';
-                messages.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+            const analyzeBody = this.analyze.commentBody;
+            if (analyzeBody) {
+                messages.push(analyzeBody);
             }
-            yield Comment_1.comment({ message: messages.join('\n'), reacts: [this.react] });
+            const formatBody = this.format.commentBody;
+            if (formatBody) {
+                messages.push(formatBody);
+            }
+            yield Comment_1.comment({ message: messages.join('\n---\n') });
         });
-    }
-    /**
-     * React to the comment on the PR
-     */
-    get react() {
-        return '+1';
     }
     issueCountMessage(params) {
         const messages = [
             this.title(params),
-            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error })),
-            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning })),
-            this.titleLine(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info })),
+            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error })),
+            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning })),
+            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info })),
+            this.titleLineFormat(Object.assign({}, params))
         ];
         return messages.join('\n');
     }
@@ -7513,7 +7640,7 @@ class Result {
             return title;
         }
     }
-    titleLine(params) {
+    titleLineAnalyze(params) {
         const isFail = DartAnalyzeLogType_1.DartAnalyzeLogType.isFail(params.type);
         let emoji = '';
         let count;
@@ -7539,6 +7666,11 @@ class Result {
         emoji = `:${emoji}: `;
         line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
         return line;
+    }
+    titleLineFormat(params) {
+        let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
+        const highlight = params.emojis && this.format.count ? '**' : '';
+        return `- ${params.emojis ? emoji : ''} ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
     }
     /**
      * Log the results in the github action
@@ -7661,10 +7793,11 @@ exports.failOn = exports.FailOn = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 var FailOn;
 (function (FailOn) {
-    FailOn[FailOn["Info"] = 0] = "Info";
+    FailOn[FailOn["Error"] = 0] = "Error";
     FailOn[FailOn["Warning"] = 1] = "Warning";
-    FailOn[FailOn["Error"] = 2] = "Error";
-    FailOn[FailOn["Nothing"] = 3] = "Nothing";
+    FailOn[FailOn["Info"] = 2] = "Info";
+    FailOn[FailOn["Format"] = 3] = "Format";
+    FailOn[FailOn["Nothing"] = 4] = "Nothing";
 })(FailOn = exports.FailOn || (exports.FailOn = {}));
 exports.failOn = getFailOn();
 function getFailOn() {
@@ -7672,6 +7805,8 @@ function getFailOn() {
     switch (input) {
         case 'nothing':
             return FailOn.Nothing;
+        case 'format':
+            return FailOn.Format;
         case 'info':
             return FailOn.Info;
         case 'warning':
@@ -7770,7 +7905,7 @@ class ModifiedFile {
                 }
             }
         }
-        else {
+        else if (core.getInput('check-renamed-files') === 'true') {
             // Take the all file
             this.additions.push(new FileLines({
                 start: 0,

@@ -1,41 +1,47 @@
-import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { ModifiedFiles } from '../utils/ModifiedFiles';
+import { FormatResult } from './FormatResult';
 
-export async function format(workingDirectory:string ): Promise<number>{
+export async function format(params: {workingDirectory:string, modifiedFiles: ModifiedFiles }): Promise<FormatResult>{
   let output = '';
+  let errOutputs = '';
 
-  const options = { cwd: workingDirectory };
-  // options.listeners = {
-  //   stdout: (data) => {
-  //     output += data.toString();
-  //   },
-  //   stderr: (data) => {
-  //     output += data.toString();
-  //   }
-  // };
+  const options: exec.ExecOptions = { cwd: params.workingDirectory };
+  options.listeners = {
+    stdout: (data) => {
+      output += data.toString();
+    },
+    stderr: (data) => {
+      errOutputs += data.toString();
+    }
+  };
 
-  const args = [];
-  const lineLength = core.getInput('line-length');
+  try {
+    await exec.exec('dart format', )
+  } catch (_) {
 
-  if (lineLength) {
-    args.push('--line-length');
-    args.push(lineLength);
   }
 
-  args.push('--dry-run');
-  args.push('.');
+  const args = ['-o none', '.'];
+  await exec.exec('dart format', args, options);
 
-  await exec.exec('dartfmt', args, options);
-
-  let warningCount = 0;
   const lines = output.trim().split(/\r?\n/);
+  const errLines = errOutputs.trim().split(/\r?\n/);
 
-  for (const line of lines) {
-    if (!line.endsWith('.dart')) continue;
+  const fileNotFormatted = new Set<string>();
 
-    console.log(`::warning file=${line}::Invalid format. For more details, see https://dart.dev/guides/language/effective-dart/style#formatting`);
-    warningCount++;
+  for (const line of [...lines, ...errLines]) {
+    if (!line.startsWith('Changed')) {
+      continue;
+    }
+
+    const file = line.split(' ')[1];
+    if (params.modifiedFiles.has(file)) {
+      fileNotFormatted.add(file);
+    }
   }
 
-  return warningCount;
+  return new FormatResult({
+    files: fileNotFormatted,
+  });
 }

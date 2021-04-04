@@ -4,13 +4,13 @@ import { AnalyzeResult } from './AnalyzeResult';
 import { ParsedLine } from './ParsedLine';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
 
-export async function analyze(workingDirectory: string): Promise<AnalyzeResult> {
+export async function analyze(params: {workingDirectory: string, modifiedFiles: ModifiedFiles}): Promise<AnalyzeResult> {
   let outputs = '';
   let errOutputs = '';
 
   console.log('::group:: Analyze dart code')
 
-  const options: exec.ExecOptions = {cwd: workingDirectory};
+  const options: exec.ExecOptions = {cwd: params.workingDirectory};
 
   options.listeners = {
     stdout: (data) => {
@@ -21,16 +21,13 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
     }
   };
   
-  const args = [workingDirectory];
+  const args = [params.workingDirectory];
 
   try {
     await exec.exec('dart analyze', args, options);
   } catch (_) {
     // dart analyze sometimes fails
   }
-
-  const modifiedFiles = new ModifiedFiles();
-  await modifiedFiles.isInit;
 
   let errorCount = 0;
   let warningCount = 0;
@@ -50,11 +47,11 @@ export async function analyze(workingDirectory: string): Promise<AnalyzeResult> 
         line,
         delimiter,
       });
-      if (!modifiedFiles.has(parsedLine.file)) {
+      if (!params.modifiedFiles.has(parsedLine.file)) {
         // Don't lint anything if the file is not part of the changes
         continue
       }
-      const modifiedFile = modifiedFiles.get(parsedLine.file)!;
+      const modifiedFile = params.modifiedFiles.get(parsedLine.file)!;
       if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
         // Don't lint if the issue doesn't belong to the additions
         continue;

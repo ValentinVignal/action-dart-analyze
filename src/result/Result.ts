@@ -1,11 +1,13 @@
 import * as core from '@actions/core';
 import { AnalyzeResult } from "../analyze/AnalyzeResult";
 import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from '../analyze/DartAnalyzeLogType';
-import { comment, CommentReact } from "../utils/Comment";
+import { FormatResult } from '../format/FormatResult';
+import { comment } from "../utils/Comment";
 import { failOn, FailOn } from "../utils/FailOn";
 
 export interface ResultInterface {
   analyze: AnalyzeResult;
+  format: FormatResult;
 }
 
 /**
@@ -13,13 +15,15 @@ export interface ResultInterface {
  */
 export class Result {
   analyze: AnalyzeResult;
+  format: FormatResult;
 
   constructor(params: ResultInterface) {
     this.analyze = params.analyze;
+    this.format = params.format;
   }
 
   public get success():boolean {
-    return this.analyze.isSuccess;
+    return this.analyze.success && this.format.success;
   }
 
   /**
@@ -30,47 +34,36 @@ export class Result {
       this.issueCountMessage({emojis: true})
     ];
 
-    messages.push('\n---\n');
-    
-    for (const line of this.analyze.lines) {
-      let urls = `[link](${line.urls[0]})`;
-      if (line.urls.length > 1) {
-        urls += ` or [link](${line.urls[1]})`
-      }
-      let failEmoji = '';
-      if (![FailOn.Nothing, FailOn.Info].includes(failOn)) {
-        failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
-      }
-      
-      const highlight = line.isFail ? '**': '';
-      messages.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+    const analyzeBody = this.analyze.commentBody;
+    if (analyzeBody) {
+      messages.push(analyzeBody);
+    }
+    const formatBody = this.format.commentBody;
+    if (formatBody) {
+      messages.push(formatBody);
     }
 
-    await comment({message: messages.join('\n'), reacts: [this.react]});
-  }
-
-  /**
-   * React to the comment on the PR
-   */
-  private get react(): CommentReact {
-    return '+1';
+    await comment({message: messages.join('\n---\n')});
   }
 
   private issueCountMessage(params?: {emojis?: boolean}): string {
     const messages: string[] = [
       this.title(params),
-      this.titleLine({
+      this.titleLineAnalyze({
         ...params,
         type: DartAnalyzeLogTypeEnum.Error,
       }),
-      this.titleLine({
+      this.titleLineAnalyze({
         ...params,
         type: DartAnalyzeLogTypeEnum.Warning,
       }),
-      this.titleLine({
+      this.titleLineAnalyze({
         ...params,
         type: DartAnalyzeLogTypeEnum.Info,
       }),
+      this.titleLineFormat({
+        ...params,
+      })
     ];
     return messages.join('\n');
   }
@@ -90,7 +83,7 @@ export class Result {
     }
   }
 
-  private titleLine(params: {emojis?: boolean, type: DartAnalyzeLogTypeEnum}): string {
+  private titleLineAnalyze(params: {emojis?: boolean, type: DartAnalyzeLogTypeEnum}): string {
     const isFail = DartAnalyzeLogType.isFail(params.type);
     let emoji = '';
     let count: number;
@@ -118,6 +111,12 @@ export class Result {
     line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
     return line;
   }
+
+    private titleLineFormat(params: {emojis?: boolean}):string {
+      let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
+      const highlight = params.emojis && this.format.count ? '**' : '';
+      return `- ${params.emojis ? emoji : '' } ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
+    }
 
   /**
    * Log the results in the github action

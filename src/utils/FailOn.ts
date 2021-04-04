@@ -1,10 +1,11 @@
 import * as core from '@actions/core';
 
 export enum FailOn{
-  Info = 0,
+  Error = 0,
   Warning = 1,
-  Error = 2,
-  Nothing = 3,
+  Info = 2,
+  Format = 3,
+  Nothing = 4,
 }
 
 export const failOn = getFailOn();
@@ -14,6 +15,8 @@ function getFailOn(): FailOn{
   switch(input) {
     case 'nothing':
       return FailOn.Nothing;
+    case 'format':
+      return FailOn.Format;
     case 'info':
       return FailOn.Info;
     case 'warning':

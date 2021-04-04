@@ -72,7 +72,7 @@ class ModifiedFile {
           console.log(`Error getting the patch of the file:\n${error}`);
         }
       }
-    } else {
+    } else if (core.getInput('check-renamed-files') === 'true') {
       // Take the all file
       this.additions.push(new FileLines({
           start: 0,
