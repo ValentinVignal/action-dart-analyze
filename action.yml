@@ -1,6 +1,8 @@
 name: 'Dart Analyze'
 description: 'Analyze a dart code'
 author: 'Valentin Vignal'
+icon: 'check-circle'
+color: 'gray-dark'
 inputs:
   fail-on:
     description: 'When the action will fail. Optional. Option: `error`, `warning`, `info`, `format`, `nothing`. Default: `error`.'
