@@ -36,6 +36,24 @@ Create a `.yml` file in `./github/workflows/` in your project.
 
 No output.
 
+## Result
+
+It will fail the checks on your Pull Requests if any issue is found: 
+
+![failed-workflow](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/failed-workflow.png)
+
+It will leave a comment explaining why it failed and what issues it found:
+
+![comment](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/comment.png)
+
+
+In the code change, it will display errors and warnings where the issues are found:
+
+![changes-warnings-errors](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/changes-warnings-errors.png)
+
+
+
+
 ## Example usage
 
 ```yml
