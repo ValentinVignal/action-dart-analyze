@@ -7373,6 +7373,120 @@ exports.analyze = analyze;
 
 /***/ }),
 
+/***/ 9564:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.format = void 0;
+const exec = __importStar(__nccwpck_require__(1514));
+const ActionOptions_1 = __nccwpck_require__(3615);
+const FormatResult_1 = __nccwpck_require__(6290);
+function format(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let output = '';
+        let errOutputs = '';
+        console.log('::group:: Analyze formatting');
+        const options = { cwd: ActionOptions_1.actionOptions.workingDirectory };
+        options.listeners = {
+            stdout: (data) => {
+                output += data.toString();
+            },
+            stderr: (data) => {
+                errOutputs += data.toString();
+            }
+        };
+        try {
+            yield exec.exec('dart format');
+        }
+        catch (_) {
+        }
+        yield exec.exec('dart format -o none .', [], options);
+        const lines = output.trim().split(/\r?\n/);
+        const errLines = errOutputs.trim().split(/\r?\n/);
+        const fileNotFormatted = new Set();
+        for (const line of [...lines, ...errLines]) {
+            if (!line.startsWith('Changed')) {
+                continue;
+            }
+            const file = line.split(' ')[1];
+            if (params.modifiedFiles.has(file)) {
+                fileNotFormatted.add(file);
+                console.log(`::warning file=${file}:: ${file} is not formatted`);
+            }
+        }
+        console.log('::endgroup::');
+        return new FormatResult_1.FormatResult({
+            files: fileNotFormatted,
+        });
+    });
+}
+exports.format = format;
+
+
+/***/ }),
+
+/***/ 6290:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FormatResult = void 0;
+const ActionOptions_1 = __nccwpck_require__(3615);
+const FailOn_1 = __nccwpck_require__(1613);
+class FormatResult {
+    constructor(params) {
+        this.files = params.files;
+    }
+    get success() {
+        return ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Format || !this.files.size;
+    }
+    get count() {
+        return this.files.size;
+    }
+    get commentBody() {
+        const comments = [];
+        for (const file of this.files) {
+            comments.push(`- [ ] :poop:  \`${file}\` is not formatted`);
+        }
+        return comments.join('\n');
+    }
+}
+exports.FormatResult = FormatResult;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7409,6 +7523,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const analyze_1 = __nccwpck_require__(115);
+const Format_1 = __nccwpck_require__(9564);
 const ModifiedFiles_1 = __nccwpck_require__(8445);
 /**
  * Run the action
@@ -7421,11 +7536,10 @@ function main() {
             const analyzeResult = yield analyze_1.analyze({
                 modifiedFiles,
             });
-            /*
-        
-            const formatResult = await format({
-              modifiedFiles,
+            const formatResult = yield Format_1.format({
+                modifiedFiles,
             });
+            /*
         
             const result = new Result({
               analyze: analyzeResult,

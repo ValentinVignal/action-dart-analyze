@@ -7,6 +7,8 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
   let output = '';
   let errOutputs = '';
 
+  console.log('::group:: Analyze formatting');
+
   const options: exec.ExecOptions = { cwd: actionOptions.workingDirectory };
   options.listeners = {
     stdout: (data) => {
@@ -23,8 +25,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
 
   }
 
-  const args = ['-o none', '.'];
-  await exec.exec('dart format', args, options);
+  await exec.exec('dart format -o none .', [], options);
 
   const lines = output.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
@@ -42,6 +43,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }
   }
+  console.log('::endgroup::');
 
   return new FormatResult({
     files: fileNotFormatted,

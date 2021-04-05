@@ -17,11 +17,11 @@ async function main(): Promise<void> {
     const analyzeResult = await analyze({
       modifiedFiles,
     });
-    /*
 
     const formatResult = await format({
       modifiedFiles,
     });
+    /*
 
     const result = new Result({
       analyze: analyzeResult,
