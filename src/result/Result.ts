@@ -34,7 +34,7 @@ export class Result {
       this.issueCountMessage({emojis: true})
     ];
 
-    const analyzeBody = this.analyze.commentBody({checkBox: true});
+    const analyzeBody = this.analyze.commentBody;
     if (analyzeBody) {
       messages.push(analyzeBody);
     }
@@ -108,14 +108,14 @@ export class Result {
 
     const highlight = isFail && params.emojis && count ? '**' : '';
     emoji = `:${emoji}: `;
-    line = `- ${params.emojis && actionOptions.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
+    line = `- ${params.emojis && actionOptions.emojis ? emoji : ''}${highlight}${line}.${highlight}`;
     return line;
   }
 
     private titleLineFormat(params: {emojis?: boolean}):string {
       let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
       const highlight = params.emojis && this.format.count ? '**' : '';
-      return `- ${params.emojis && params.emojis ? emoji : '' } ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
+      return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
     }
 
   /**
