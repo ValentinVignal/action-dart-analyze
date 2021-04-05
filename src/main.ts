@@ -17,6 +17,7 @@ async function main(): Promise<void> {
     const analyzeResult = await analyze({
       modifiedFiles,
     });
+    /*
 
     const formatResult = await format({
       modifiedFiles,
@@ -31,6 +32,7 @@ async function main(): Promise<void> {
       await result.comment();
     }
     result.log();
+    */
   } catch (error) {
     core.setFailed(`error: ${error.message}`);
   }

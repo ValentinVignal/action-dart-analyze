@@ -7100,7 +7100,7 @@ class AnalyzeResult {
     /**
      * Get the comment body
      */
-    commentBody(params) {
+    get commentBody() {
         const comments = [];
         for (const line of this.lines) {
             let urls = `[link](${line.urls[0]})`;
@@ -7111,12 +7111,8 @@ class AnalyzeResult {
             if (![FailOn_1.FailOnEnum.Nothing, FailOn_1.FailOnEnum.Format, FailOn_1.FailOnEnum.Info].includes(ActionOptions_1.actionOptions.failOn)) {
                 failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
             }
-            let originalLine = line.originalLine;
-            if (params.checkBox) {
-                originalLine = originalLine.replace(line.file, `\`${line.file}\``);
-            }
             const highlight = line.isFail ? '**' : '';
-            comments.push(`- ${params.checkBox ? '[ ] ' : ''}${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji : ''} ${highlight}${originalLine.trim()}.${highlight} See ${urls}`);
+            comments.push(`- [ ] ${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji : ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}`);
         }
         return comments.join('\n');
     }
@@ -7377,119 +7373,6 @@ exports.analyze = analyze;
 
 /***/ }),
 
-/***/ 9564:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.format = void 0;
-const exec = __importStar(__nccwpck_require__(1514));
-const ActionOptions_1 = __nccwpck_require__(3615);
-const FormatResult_1 = __nccwpck_require__(6290);
-function format(params) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let output = '';
-        let errOutputs = '';
-        const options = { cwd: ActionOptions_1.actionOptions.workingDirectory };
-        options.listeners = {
-            stdout: (data) => {
-                output += data.toString();
-            },
-            stderr: (data) => {
-                errOutputs += data.toString();
-            }
-        };
-        try {
-            yield exec.exec('dart format');
-        }
-        catch (_) {
-        }
-        const args = ['-o none', '.'];
-        yield exec.exec('dart format', args, options);
-        const lines = output.trim().split(/\r?\n/);
-        const errLines = errOutputs.trim().split(/\r?\n/);
-        const fileNotFormatted = new Set();
-        for (const line of [...lines, ...errLines]) {
-            if (!line.startsWith('Changed')) {
-                continue;
-            }
-            const file = line.split(' ')[1];
-            if (params.modifiedFiles.has(file)) {
-                fileNotFormatted.add(file);
-                console.log(`::warning file=${file}:: ${file} is not formatted`);
-            }
-        }
-        return new FormatResult_1.FormatResult({
-            files: fileNotFormatted,
-        });
-    });
-}
-exports.format = format;
-
-
-/***/ }),
-
-/***/ 6290:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FormatResult = void 0;
-const ActionOptions_1 = __nccwpck_require__(3615);
-const FailOn_1 = __nccwpck_require__(1613);
-class FormatResult {
-    constructor(params) {
-        this.files = params.files;
-    }
-    get success() {
-        return ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Format || !this.files.size;
-    }
-    get count() {
-        return this.files.size;
-    }
-    get commentBody() {
-        const comments = [];
-        for (const file of this.files) {
-            comments.push(`- [ ] :poop:  \`${file}\` is not formatted`);
-        }
-        return comments.join('\n');
-    }
-}
-exports.FormatResult = FormatResult;
-
-
-/***/ }),
-
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -7526,8 +7409,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const analyze_1 = __nccwpck_require__(115);
-const Format_1 = __nccwpck_require__(9564);
-const Result_1 = __nccwpck_require__(6529);
 const ModifiedFiles_1 = __nccwpck_require__(8445);
 /**
  * Run the action
@@ -7540,17 +7421,22 @@ function main() {
             const analyzeResult = yield analyze_1.analyze({
                 modifiedFiles,
             });
-            const formatResult = yield Format_1.format({
-                modifiedFiles,
+            /*
+        
+            const formatResult = await format({
+              modifiedFiles,
             });
-            const result = new Result_1.Result({
-                analyze: analyzeResult,
-                format: formatResult,
+        
+            const result = new Result({
+              analyze: analyzeResult,
+              format: formatResult,
             });
+        
             if (!result.success) {
-                yield result.comment();
+              await result.comment();
             }
             result.log();
+            */
         }
         catch (error) {
             core.setFailed(`error: ${error.message}`);
@@ -7558,149 +7444,6 @@ function main() {
     });
 }
 main();
-
-
-/***/ }),
-
-/***/ 6529:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Result = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
-const ActionOptions_1 = __nccwpck_require__(3615);
-const Comment_1 = __nccwpck_require__(961);
-/**
- * Handle and summarize the results
- */
-class Result {
-    constructor(params) {
-        this.analyze = params.analyze;
-        this.format = params.format;
-    }
-    get success() {
-        return this.analyze.success && this.format.success;
-    }
-    /**
-     * Put a comment on the PR
-     */
-    comment() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const messages = [
-                this.issueCountMessage({ emojis: true })
-            ];
-            const analyzeBody = this.analyze.commentBody({ checkBox: true });
-            if (analyzeBody) {
-                messages.push(analyzeBody);
-            }
-            const formatBody = this.format.commentBody;
-            if (formatBody) {
-                messages.push(formatBody);
-            }
-            yield Comment_1.comment({ message: messages.join('\n---\n') });
-        });
-    }
-    issueCountMessage(params) {
-        const messages = [
-            this.title(params),
-            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error })),
-            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning })),
-            this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info })),
-            this.titleLineFormat(Object.assign({}, params))
-        ];
-        return messages.join('\n');
-    }
-    title(params) {
-        const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
-        if ((params === null || params === void 0 ? void 0 : params.emojis) && ActionOptions_1.actionOptions.emojis) {
-            let emoji = ':tada:';
-            if (this.analyze.counts.failCount) {
-                emoji = ':x:';
-            }
-            else if (this.analyze.counts.total) {
-                emoji = ':warning:';
-            }
-            return `${emoji} ${title}`;
-        }
-        else {
-            return title;
-        }
-    }
-    titleLineAnalyze(params) {
-        const isFail = DartAnalyzeLogType_1.DartAnalyzeLogType.isFail(params.type);
-        let emoji = '';
-        let count;
-        let line = '';
-        switch (params.type) {
-            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error:
-                count = this.analyze.counts.errors;
-                emoji = count ? 'x' : 'white_check_mark';
-                line = `${count} error${Result.pluralS(count)}`;
-                break;
-            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning:
-                count = this.analyze.counts.warnings;
-                emoji = count ? 'warning' : 'tada';
-                line = `${count} warning${Result.pluralS(count)}`;
-                break;
-            case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info:
-                count = this.analyze.counts.info;
-                emoji = count ? 'eyes' : 'rocket';
-                line = `${count} info log${Result.pluralS(count)}`;
-                break;
-        }
-        const highlight = isFail && params.emojis && count ? '**' : '';
-        emoji = `:${emoji}: `;
-        line = `- ${params.emojis && ActionOptions_1.actionOptions.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
-        return line;
-    }
-    titleLineFormat(params) {
-        let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
-        const highlight = params.emojis && this.format.count ? '**' : '';
-        return `- ${params.emojis && params.emojis ? emoji : ''} ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
-    }
-    /**
-     * Log the results in the github action
-     */
-    log() {
-        const logger = this.success ? core.warning : core.setFailed;
-        logger(this.issueCountMessage());
-    }
-    static pluralS(count) {
-        return count > 1 ? 's' : '';
-    }
-}
-exports.Result = Result;
 
 
 /***/ }),
@@ -7750,82 +7493,6 @@ class ActionOptions {
  * Singleton with the option of the action
  */
 exports.actionOptions = new ActionOptions();
-
-
-/***/ }),
-
-/***/ 961:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.comment = void 0;
-const github = __importStar(__nccwpck_require__(5438));
-const core = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(3030);
-function comment(params) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!github.context.payload.pull_request) {
-            // Can only comment on Pull Requests
-            return;
-        }
-        const octokit = github.getOctokit(core.getInput('token', { required: true }));
-        // Create the comment
-        try {
-            const comment = yield octokit.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: utils_1.context.payload.pull_request.number, body: params.message }));
-            if (params.reacts) {
-                for (const react of params.reacts) {
-                    try {
-                        const [owner, repo] = (_a = process.env.GITHUB_REPOSITORY) === null || _a === void 0 ? void 0 : _a.split('/');
-                        yield octokit.reactions.createForCommitComment({
-                            owner: owner,
-                            repo: repo,
-                            comment_id: comment.data.id,
-                            content: react,
-                        });
-                    }
-                    catch (error) {
-                        console.log(`Couldn't react :${react}: on ${comment.data.id}:\n${error}`);
-                    }
-                }
-            }
-        }
-        catch (error) {
-            console.log(`Couldn't comment "${params.message} with reacts ${params.reacts}`);
-        }
-    });
-}
-exports.comment = comment;
 
 
 /***/ }),
