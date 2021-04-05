@@ -86,9 +86,12 @@ export class AnalyzeResult {
       if (![FailOnEnum.Nothing, FailOnEnum.Format, FailOnEnum.Info].includes(actionOptions.failOn)) {
         failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
       }
-      
+      let originalLine = line.originalLine;
+      if (params.checkBox) {
+        originalLine = originalLine.replace(line.file, `\`${line.file}\``);
+      }
       const highlight = line.isFail ? '**': '';
-      comments.push(`- ${params.checkBox ? '[ ] ': ''}${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+      comments.push(`- ${params.checkBox ? '[ ] ': ''}${actionOptions.emojis ? failEmoji + line.emoji: ''} ${highlight}${originalLine.trim()}.${highlight} See ${urls}`);
     }
     return comments.join('\n');
   }

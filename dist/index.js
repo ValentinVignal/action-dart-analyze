@@ -7111,8 +7111,12 @@ class AnalyzeResult {
             if (![FailOn_1.FailOnEnum.Nothing, FailOn_1.FailOnEnum.Format, FailOn_1.FailOnEnum.Info].includes(ActionOptions_1.actionOptions.failOn)) {
                 failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
             }
+            let originalLine = line.originalLine;
+            if (params.checkBox) {
+                originalLine = originalLine.replace(line.file, `\`${line.file}\``);
+            }
             const highlight = line.isFail ? '**' : '';
-            comments.push(`- ${params.checkBox ? '[ ] ' : ''}${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+            comments.push(`- ${params.checkBox ? '[ ] ' : ''}${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji : ''} ${highlight}${originalLine.trim()}.${highlight} See ${urls}`);
         }
         return comments.join('\n');
     }
@@ -7615,9 +7619,9 @@ class Result {
             const messages = [
                 this.issueCountMessage({ emojis: true })
             ];
-            const analyzeBody = this.analyze.commentBody;
+            const analyzeBody = this.analyze.commentBody({ checkBox: true });
             if (analyzeBody) {
-                messages.push(analyzeBody({ checkBox: true }));
+                messages.push(analyzeBody);
             }
             const formatBody = this.format.commentBody;
             if (formatBody) {

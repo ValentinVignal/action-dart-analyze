@@ -34,9 +34,9 @@ export class Result {
       this.issueCountMessage({emojis: true})
     ];
 
-    const analyzeBody = this.analyze.commentBody;
+    const analyzeBody = this.analyze.commentBody({checkBox: true});
     if (analyzeBody) {
-      messages.push(analyzeBody({checkBox: true}));
+      messages.push(analyzeBody);
     }
     const formatBody = this.format.commentBody;
     if (formatBody) {
