@@ -4,6 +4,7 @@ import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from '../analyze/DartAnaly
 import { FormatResult } from '../format/FormatResult';
 import { actionOptions } from '../utils/ActionOptions';
 import { comment } from "../utils/Comment";
+import { FailOnEnum } from '../utils/FailOn';
 
 export interface ResultInterface {
   analyze: AnalyzeResult;
@@ -114,8 +115,8 @@ export class Result {
 
     private titleLineFormat(params: {emojis?: boolean}):string {
       let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
-      const highlight = params.emojis && this.format.count ? '**' : '';
-      return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
+      const highlight = params.emojis && this.format.count && actionOptions.failOn === FailOnEnum.Format ? '**' : '';
+      return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
     }
 
   /**

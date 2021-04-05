@@ -20,12 +20,11 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
   };
 
   try {
-    await exec.exec('dart format', )
+    await exec.exec('dart format -o none .', [], options);
   } catch (_) {
 
   }
 
-  await exec.exec('dart format -o none .', [], options);
 
   const lines = output.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
