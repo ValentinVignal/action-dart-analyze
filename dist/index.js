@@ -7445,6 +7445,7 @@ function format(params) {
             const file = line.split(' ')[1];
             if (params.modifiedFiles.has(file)) {
                 fileNotFormatted.add(file);
+                console.log(`::warning file=${file}:: ${file} is not formatted`);
             }
         }
         return new FormatResult_1.FormatResult({

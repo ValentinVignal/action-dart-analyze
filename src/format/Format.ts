@@ -39,6 +39,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
     const file = line.split(' ')[1];
     if (params.modifiedFiles.has(file)) {
       fileNotFormatted.add(file);
+      console.log(`::warning file=${file}:: ${file} is not formatted`);
     }
   }
 
