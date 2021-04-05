@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import { AnalyzeResult } from "../analyze/AnalyzeResult";
 import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from '../analyze/DartAnalyzeLogType';
 import { FormatResult } from '../format/FormatResult';
+import { actionOptions } from '../utils/ActionOptions';
 import { comment } from "../utils/Comment";
-import { failOn, FailOn } from "../utils/FailOn";
 
 export interface ResultInterface {
   analyze: AnalyzeResult;
@@ -36,7 +36,7 @@ export class Result {
 
     const analyzeBody = this.analyze.commentBody;
     if (analyzeBody) {
-      messages.push(analyzeBody);
+      messages.push(analyzeBody({checkBox: true}));
     }
     const formatBody = this.format.commentBody;
     if (formatBody) {
@@ -70,7 +70,7 @@ export class Result {
 
   private title(params?: {emojis?: boolean}): string {
     const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
-    if (params?.emojis) {
+    if (params?.emojis && actionOptions.emojis) {
       let emoji = ':tada:';
       if (this.analyze.counts.failCount) {
         emoji = ':x:';
@@ -108,14 +108,14 @@ export class Result {
 
     const highlight = isFail && params.emojis && count ? '**' : '';
     emoji = `:${emoji}: `;
-    line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
+    line = `- ${params.emojis && actionOptions.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
     return line;
   }
 
     private titleLineFormat(params: {emojis?: boolean}):string {
       let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
       const highlight = params.emojis && this.format.count ? '**' : '';
-      return `- ${params.emojis ? emoji : '' } ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
+      return `- ${params.emojis && params.emojis ? emoji : '' } ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
     }
 
   /**

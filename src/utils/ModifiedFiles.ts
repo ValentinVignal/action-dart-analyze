@@ -2,12 +2,16 @@ import * as github from '@actions/github';
 import * as core from '@actions/core';
 import { EventName } from '../actions/github/EventName';
 import { context } from '@actions/github/lib/utils';
+import { actionOptions } from './ActionOptions';
 
 interface FileLinesInterface {
   start: number;
   end: number
 }
 
+/**
+ * Modified lines chunk of a file
+ */
 class FileLines {
   readonly start: number;
   readonly end: number;
@@ -44,6 +48,11 @@ class ModifiedFile {
     this.parsePatch(file.patch);
   }
 
+  /**
+   * Parse the patch from github and properly set the objects attributes
+   * 
+   * @param patch The patch from Github
+   */
   private parsePatch(patch?: string|undefined): void {
     if (patch) {
       // The changes are included in the file
@@ -72,7 +81,7 @@ class ModifiedFile {
           console.log(`Error getting the patch of the file:\n${error}`);
         }
       }
-    } else if (core.getInput('check-renamed-files') === 'true') {
+    } else if (actionOptions.checkRenamedFiles) {
       // Take the all file
       this.additions.push(new FileLines({
           start: 0,
@@ -85,18 +94,33 @@ class ModifiedFile {
     }
   }
 
+  /**
+   * Whether the file has addition
+   */
   public get hasAdditions(): boolean {
     return !!this.additions.length;
   }
 
+  /**
+   * Whether the file has deletion
+   */
   public get hasDeletions(): boolean {
     return !!this.deletions.length;
   }
 
+  /**
+   * Whether the file has changes (addition or deletion)
+   */
   public get hasChanges(): boolean {
     return this.hasAdditions || this.hasDeletions;
   }
 
+  /**
+   * Check if a line is an addition of the file
+   * 
+   * @param line 
+   * @returns true if the line number is included in the added lines
+   */
   public hasAdditionLine(line: number): boolean {
     if (!this.hasAdditions) {
       return false;
@@ -104,6 +128,12 @@ class ModifiedFile {
     return this.additions.some((fileLines) => fileLines.includes(line));
   }
 
+  /**
+   * Check if a line is a deletion of the file
+   * 
+   * @param line 
+   * @returns true if the line number is include in the deleted lines
+   */
   public hasDeletionLine(line: number): boolean {
     if (!this.hasDeletions) {
       return false;
@@ -111,6 +141,12 @@ class ModifiedFile {
     return this.deletions.some((fileLines) => fileLines.includes(line));
   }
 
+  /**
+   * Check if a line is a change of the file
+   * 
+   * @param line 
+   * @returns true if the line is included in the changed lines
+   */
   public hasLine(line: number): boolean {
     return this.hasAdditionLine(line) || this.hasDeletionLine(line);
   }
@@ -121,6 +157,9 @@ class ModifiedFile {
  */
 export class ModifiedFiles {
   readonly files: Map<ModifiedFile['name'], ModifiedFile>;
+  /**
+   * Wait for this variable to be sure all the files has been loaded
+   */
   readonly isInit: Promise<boolean>;
   private readonly _resolveInit: (value: boolean) => void;
 
@@ -135,6 +174,9 @@ export class ModifiedFiles {
 
   }
 
+  /**
+   * Init the class
+   */
   private async init(): Promise<void> {
     const files = await this.getGithubFiles();
     for (const file of files) {
@@ -144,8 +186,12 @@ export class ModifiedFiles {
   }
 
 
-
-  private async getGithubFiles() {
+  /**
+   * Get the modified files
+   * 
+   * @returns 
+   */
+  private async getGithubFiles(): Promise<{filename: string, patch?: string|undefined}[]>{
     const eventName = github.context.eventName as EventName;
     let base = '';
     let head = '';
@@ -194,10 +240,22 @@ export class ModifiedFiles {
     return response.data.files;
   }
 
+  /**
+   * Check whether a file is modified
+   * 
+   * @param fileName 
+   * @returns true if fileName is a modified file
+   */
   public has(fileName: string): boolean {
     return this.files.has(fileName);
   }
 
+  /**
+   * Get the modified file
+   * 
+   * @param fileName 
+   * @returns The modified file if it has been modified
+   */
   public get(fileName: string): ModifiedFile|undefined {
     return this.files.get(fileName);
   }

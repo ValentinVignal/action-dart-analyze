@@ -1,4 +1,5 @@
-import { failOn, FailOn } from "../utils/FailOn";
+import { actionOptions } from "../utils/ActionOptions";
+import { FailOnEnum } from "../utils/FailOn";
 import { ParsedLine } from "./ParsedLine";
 
 export interface AnalyzeResultCountsInterface {
@@ -29,11 +30,11 @@ class AnalyzeResultCounts {
 
   public get failCount(): number {
     let count = 0;
-    if (failOn !== FailOn.Nothing) {
+    if (actionOptions.failOn !== FailOnEnum.Nothing) {
       count += this.errors;
-      if (failOn !== FailOn.Error) {
+      if (actionOptions.failOn !== FailOnEnum.Error) {
         count += this.warnings;
-        if (failOn !== FailOn.Warning) {
+        if (actionOptions.failOn !== FailOnEnum.Warning) {
           count += this.info;
         }
       }
@@ -70,7 +71,10 @@ export class AnalyzeResult {
     return !!this.counts.total;
   }
 
-  public get commentBody(): string {
+  /**
+   * Get the comment body
+   */
+  public commentBody(params: {checkBox?: boolean}): string {
     const comments: string[] = [];
 
     for (const line of this.lines) {
@@ -79,12 +83,12 @@ export class AnalyzeResult {
         urls += ` or [link](${line.urls[1]})`
       }
       let failEmoji = '';
-      if (![FailOn.Nothing, FailOn.Format, FailOn.Info].includes(failOn)) {
+      if (![FailOnEnum.Nothing, FailOnEnum.Format, FailOnEnum.Info].includes(actionOptions.failOn)) {
         failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
       }
       
       const highlight = line.isFail ? '**': '';
-      comments.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+      comments.push(`- ${params.checkBox ? '[ ] ': ''}${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
     }
     return comments.join('\n');
   }

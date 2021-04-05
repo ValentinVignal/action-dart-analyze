@@ -1,4 +1,5 @@
-import { FailOn, failOn } from "../utils/FailOn";
+import { actionOptions } from "../utils/ActionOptions";
+import { FailOnEnum } from "../utils/FailOn";
 
 export enum DartAnalyzeLogTypeEnum{
   Info = 1,
@@ -32,16 +33,16 @@ export class DartAnalyzeLogType {
   }
 
   public static isFail(logType: DartAnalyzeLogTypeEnum): boolean {
-    switch (failOn) {
-      case FailOn.Nothing:
+    switch (actionOptions.failOn) {
+      case FailOnEnum.Nothing:
         return false;
-      case FailOn.Format:
+      case FailOnEnum.Format:
         return false;
-      case FailOn.Info:
+      case FailOnEnum.Info:
         return true;
-      case FailOn.Warning:
+      case FailOnEnum.Warning:
         return logType === DartAnalyzeLogTypeEnum.Error || logType === DartAnalyzeLogTypeEnum.Warning;
-      case FailOn.Error:
+      case FailOnEnum.Error:
       default:
         return logType === DartAnalyzeLogTypeEnum.Error;
     }

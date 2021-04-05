@@ -3,14 +3,21 @@ import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from './DartAnalyzeLogType
 import { AnalyzeResult } from './AnalyzeResult';
 import { ParsedLine } from './ParsedLine';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
+import { actionOptions } from '../utils/ActionOptions';
 
-export async function analyze(params: {workingDirectory: string, modifiedFiles: ModifiedFiles}): Promise<AnalyzeResult> {
+/**
+ * Runs `dart analyze`
+ * 
+ * @param params 
+ * @returns The result of `dart analyze`
+ */
+export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<AnalyzeResult> {
   let outputs = '';
   let errOutputs = '';
 
   console.log('::group:: Analyze dart code')
 
-  const options: exec.ExecOptions = {cwd: params.workingDirectory};
+  const options: exec.ExecOptions = {cwd: actionOptions.workingDirectory};
 
   options.listeners = {
     stdout: (data) => {
@@ -21,7 +28,7 @@ export async function analyze(params: {workingDirectory: string, modifiedFiles: 
     }
   };
   
-  const args = [params.workingDirectory];
+  const args = [actionOptions.workingDirectory];
 
   try {
     await exec.exec('dart analyze', args, options);

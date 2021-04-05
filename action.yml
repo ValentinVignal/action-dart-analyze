@@ -7,17 +7,21 @@ inputs:
     default: 'error'
     required: false
   working-directory:
-    description: 'The working directory. Optional. Default: `./`'
+    description: 'The working directory. Optional. Default: `./`.'
     default: ./
     required: false
   token:
-    description: 'The github token'
+    description: 'The github token.'
     required: false
     default: ${{ github.token }}
   check-renamed-files:
-    description: 'Whether it should check the renamed files with no changes'
+    description: 'Whether it should check the renamed files with no changes. Options: `false`, `true`. Default: `false`.'
     required: false
     default: 'false'
+  emojis: 
+    description: 'Whether it should include emojis in the comment. Option: `false`, `true`. Default: `true`.'
+    required: false
+    default: 'true'
 
 runs:
   using: 'node12'

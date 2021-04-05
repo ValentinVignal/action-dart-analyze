@@ -1,6 +1,4 @@
-import * as core from '@actions/core';
-
-export enum FailOn{
+export enum FailOnEnum{
   Error = 0,
   Warning = 1,
   Info = 2,
@@ -8,21 +6,20 @@ export enum FailOn{
   Nothing = 4,
 }
 
-export const failOn = getFailOn();
-
-function getFailOn(): FailOn{
-  const input = core.getInput('fail-on');
-  switch(input) {
-    case 'nothing':
-      return FailOn.Nothing;
-    case 'format':
-      return FailOn.Format;
-    case 'info':
-      return FailOn.Info;
-    case 'warning':
-      return FailOn.Warning;
-    default:
-      return FailOn.Error;
+export class FailOn {
+  static fromInput(input: string) {
+    switch(input) {
+      case 'nothing':
+        return FailOnEnum.Nothing;
+      case 'format':
+        return FailOnEnum.Format;
+      case 'info':
+        return FailOnEnum.Info;
+      case 'warning':
+        return FailOnEnum.Warning;
+      default:
+        return FailOnEnum.Error;
+    }
   }
-  
 }
+

@@ -7053,6 +7053,7 @@ function wrappy (fn, cb) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AnalyzeResult = void 0;
+const ActionOptions_1 = __nccwpck_require__(3615);
 const FailOn_1 = __nccwpck_require__(1613);
 /**
  * Different log counts from the dart Analyze
@@ -7071,11 +7072,11 @@ class AnalyzeResultCounts {
     }
     get failCount() {
         let count = 0;
-        if (FailOn_1.failOn !== FailOn_1.FailOn.Nothing) {
+        if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Nothing) {
             count += this.errors;
-            if (FailOn_1.failOn !== FailOn_1.FailOn.Error) {
+            if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Error) {
                 count += this.warnings;
-                if (FailOn_1.failOn !== FailOn_1.FailOn.Warning) {
+                if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Warning) {
                     count += this.info;
                 }
             }
@@ -7096,7 +7097,10 @@ class AnalyzeResult {
     get hasWarning() {
         return !!this.counts.total;
     }
-    get commentBody() {
+    /**
+     * Get the comment body
+     */
+    commentBody(params) {
         const comments = [];
         for (const line of this.lines) {
             let urls = `[link](${line.urls[0]})`;
@@ -7104,11 +7108,11 @@ class AnalyzeResult {
                 urls += ` or [link](${line.urls[1]})`;
             }
             let failEmoji = '';
-            if (![FailOn_1.FailOn.Nothing, FailOn_1.FailOn.Format, FailOn_1.FailOn.Info].includes(FailOn_1.failOn)) {
+            if (![FailOn_1.FailOnEnum.Nothing, FailOn_1.FailOnEnum.Format, FailOn_1.FailOnEnum.Info].includes(ActionOptions_1.actionOptions.failOn)) {
                 failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
             }
             const highlight = line.isFail ? '**' : '';
-            comments.push(`- [ ] ${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
+            comments.push(`- ${params.checkBox ? '[ ] ' : ''}${failEmoji}${line.emoji} ${highlight}${line.originalLine.trim()}.${highlight} See ${urls}`);
         }
         return comments.join('\n');
     }
@@ -7125,6 +7129,7 @@ exports.AnalyzeResult = AnalyzeResult;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DartAnalyzeLogType = exports.DartAnalyzeLogTypeEnum = void 0;
+const ActionOptions_1 = __nccwpck_require__(3615);
 const FailOn_1 = __nccwpck_require__(1613);
 var DartAnalyzeLogTypeEnum;
 (function (DartAnalyzeLogTypeEnum) {
@@ -7152,16 +7157,16 @@ class DartAnalyzeLogType {
         }
     }
     static isFail(logType) {
-        switch (FailOn_1.failOn) {
-            case FailOn_1.FailOn.Nothing:
+        switch (ActionOptions_1.actionOptions.failOn) {
+            case FailOn_1.FailOnEnum.Nothing:
                 return false;
-            case FailOn_1.FailOn.Format:
+            case FailOn_1.FailOnEnum.Format:
                 return false;
-            case FailOn_1.FailOn.Info:
+            case FailOn_1.FailOnEnum.Info:
                 return true;
-            case FailOn_1.FailOn.Warning:
+            case FailOn_1.FailOnEnum.Warning:
                 return logType === DartAnalyzeLogTypeEnum.Error || logType === DartAnalyzeLogTypeEnum.Warning;
-            case FailOn_1.FailOn.Error:
+            case FailOn_1.FailOnEnum.Error:
             default:
                 return logType === DartAnalyzeLogTypeEnum.Error;
         }
@@ -7179,6 +7184,7 @@ exports.DartAnalyzeLogType = DartAnalyzeLogType;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ParsedLine = void 0;
+const ActionOptions_1 = __nccwpck_require__(3615);
 const FailOn_1 = __nccwpck_require__(1613);
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 class ParsedLine {
@@ -7204,15 +7210,15 @@ class ParsedLine {
         this.message = lintMessage;
     }
     get isFail() {
-        if (FailOn_1.failOn !== FailOn_1.FailOn.Nothing) {
+        if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Nothing) {
             if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error) {
                 return true;
             }
-            if (FailOn_1.failOn !== FailOn_1.FailOn.Error) {
+            if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Error) {
                 if (this.type === DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning) {
                     return true;
                 }
-                if (FailOn_1.failOn !== FailOn_1.FailOn.Warning) {
+                if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Warning) {
                     // It is FailOn.Info
                     return true;
                 }
@@ -7275,12 +7281,19 @@ const exec = __importStar(__nccwpck_require__(1514));
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
 const AnalyzeResult_1 = __nccwpck_require__(4896);
 const ParsedLine_1 = __nccwpck_require__(1738);
+const ActionOptions_1 = __nccwpck_require__(3615);
+/**
+ * Runs `dart analyze`
+ *
+ * @param params
+ * @returns The result of `dart analyze`
+ */
 function analyze(params) {
     return __awaiter(this, void 0, void 0, function* () {
         let outputs = '';
         let errOutputs = '';
         console.log('::group:: Analyze dart code');
-        const options = { cwd: params.workingDirectory };
+        const options = { cwd: ActionOptions_1.actionOptions.workingDirectory };
         options.listeners = {
             stdout: (data) => {
                 outputs += data.toString();
@@ -7289,7 +7302,7 @@ function analyze(params) {
                 errOutputs += data.toString();
             }
         };
-        const args = [params.workingDirectory];
+        const args = [ActionOptions_1.actionOptions.workingDirectory];
         try {
             yield exec.exec('dart analyze', args, options);
         }
@@ -7396,12 +7409,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.format = void 0;
 const exec = __importStar(__nccwpck_require__(1514));
+const ActionOptions_1 = __nccwpck_require__(3615);
 const FormatResult_1 = __nccwpck_require__(6290);
 function format(params) {
     return __awaiter(this, void 0, void 0, function* () {
         let output = '';
         let errOutputs = '';
-        const options = { cwd: params.workingDirectory };
+        const options = { cwd: ActionOptions_1.actionOptions.workingDirectory };
         options.listeners = {
             stdout: (data) => {
                 output += data.toString();
@@ -7446,13 +7460,14 @@ exports.format = format;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FormatResult = void 0;
+const ActionOptions_1 = __nccwpck_require__(3615);
 const FailOn_1 = __nccwpck_require__(1613);
 class FormatResult {
     constructor(params) {
         this.files = params.files;
     }
     get success() {
-        return FailOn_1.failOn !== FailOn_1.FailOn.Format || !this.files.size;
+        return ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Format || !this.files.size;
     }
     get count() {
         return this.files.size;
@@ -7505,26 +7520,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const path = __importStar(__nccwpck_require__(5622));
 const analyze_1 = __nccwpck_require__(115);
 const Format_1 = __nccwpck_require__(9564);
 const Result_1 = __nccwpck_require__(6529);
 const ModifiedFiles_1 = __nccwpck_require__(8445);
+/**
+ * Run the action
+ */
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, core.getInput('working-directory'));
-            if (!workingDirectory) {
-                workingDirectory = './';
-            }
             const modifiedFiles = new ModifiedFiles_1.ModifiedFiles();
             yield modifiedFiles.isInit;
             const analyzeResult = yield analyze_1.analyze({
-                workingDirectory,
                 modifiedFiles,
             });
             const formatResult = yield Format_1.format({
-                workingDirectory,
                 modifiedFiles,
             });
             const result = new Result_1.Result({
@@ -7583,6 +7594,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Result = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const DartAnalyzeLogType_1 = __nccwpck_require__(5054);
+const ActionOptions_1 = __nccwpck_require__(3615);
 const Comment_1 = __nccwpck_require__(961);
 /**
  * Handle and summarize the results
@@ -7605,7 +7617,7 @@ class Result {
             ];
             const analyzeBody = this.analyze.commentBody;
             if (analyzeBody) {
-                messages.push(analyzeBody);
+                messages.push(analyzeBody({ checkBox: true }));
             }
             const formatBody = this.format.commentBody;
             if (formatBody) {
@@ -7626,7 +7638,7 @@ class Result {
     }
     title(params) {
         const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
-        if (params === null || params === void 0 ? void 0 : params.emojis) {
+        if ((params === null || params === void 0 ? void 0 : params.emojis) && ActionOptions_1.actionOptions.emojis) {
             let emoji = ':tada:';
             if (this.analyze.counts.failCount) {
                 emoji = ':x:';
@@ -7664,13 +7676,13 @@ class Result {
         }
         const highlight = isFail && params.emojis && count ? '**' : '';
         emoji = `:${emoji}: `;
-        line = `- ${params.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
+        line = `- ${params.emojis && ActionOptions_1.actionOptions.emojis ? emoji : ''} ${highlight}${line}.${highlight}`;
         return line;
     }
     titleLineFormat(params) {
         let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
         const highlight = params.emojis && this.format.count ? '**' : '';
-        return `- ${params.emojis ? emoji : ''} ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
+        return `- ${params.emojis && params.emojis ? emoji : ''} ${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}`;
     }
     /**
      * Log the results in the github action
@@ -7684,6 +7696,55 @@ class Result {
     }
 }
 exports.Result = Result;
+
+
+/***/ }),
+
+/***/ 3615:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.actionOptions = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const path = __importStar(__nccwpck_require__(5622));
+const FailOn_1 = __nccwpck_require__(1613);
+/**
+ * Contains all the options of the action
+ */
+class ActionOptions {
+    constructor() {
+        this.failOn = FailOn_1.FailOn.fromInput(core.getInput('fail-on', { required: true }));
+        this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, core.getInput('working-directory', { required: true }));
+        this.token = core.getInput('token', { required: true });
+        this.checkRenamedFiles = core.getInput('check-renamed-files', { required: true }) === 'true';
+        this.emojis = core.getInput('emojis', { required: true }) === 'true';
+    }
+}
+/**
+ * Singleton with the option of the action
+ */
+exports.actionOptions = new ActionOptions();
 
 
 /***/ }),
@@ -7765,56 +7826,37 @@ exports.comment = comment;
 /***/ }),
 
 /***/ 1613:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.failOn = exports.FailOn = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-var FailOn;
-(function (FailOn) {
-    FailOn[FailOn["Error"] = 0] = "Error";
-    FailOn[FailOn["Warning"] = 1] = "Warning";
-    FailOn[FailOn["Info"] = 2] = "Info";
-    FailOn[FailOn["Format"] = 3] = "Format";
-    FailOn[FailOn["Nothing"] = 4] = "Nothing";
-})(FailOn = exports.FailOn || (exports.FailOn = {}));
-exports.failOn = getFailOn();
-function getFailOn() {
-    const input = core.getInput('fail-on');
-    switch (input) {
-        case 'nothing':
-            return FailOn.Nothing;
-        case 'format':
-            return FailOn.Format;
-        case 'info':
-            return FailOn.Info;
-        case 'warning':
-            return FailOn.Warning;
-        default:
-            return FailOn.Error;
+exports.FailOn = exports.FailOnEnum = void 0;
+var FailOnEnum;
+(function (FailOnEnum) {
+    FailOnEnum[FailOnEnum["Error"] = 0] = "Error";
+    FailOnEnum[FailOnEnum["Warning"] = 1] = "Warning";
+    FailOnEnum[FailOnEnum["Info"] = 2] = "Info";
+    FailOnEnum[FailOnEnum["Format"] = 3] = "Format";
+    FailOnEnum[FailOnEnum["Nothing"] = 4] = "Nothing";
+})(FailOnEnum = exports.FailOnEnum || (exports.FailOnEnum = {}));
+class FailOn {
+    static fromInput(input) {
+        switch (input) {
+            case 'nothing':
+                return FailOnEnum.Nothing;
+            case 'format':
+                return FailOnEnum.Format;
+            case 'info':
+                return FailOnEnum.Info;
+            case 'warning':
+                return FailOnEnum.Warning;
+            default:
+                return FailOnEnum.Error;
+        }
     }
 }
+exports.FailOn = FailOn;
 
 
 /***/ }),
@@ -7857,6 +7899,10 @@ exports.ModifiedFiles = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(3030);
+const ActionOptions_1 = __nccwpck_require__(3615);
+/**
+ * Modified lines chunk of a file
+ */
 class FileLines {
     constructor(params) {
         this.start = params.start;
@@ -7876,6 +7922,11 @@ class ModifiedFile {
         this.deletions = [];
         this.parsePatch(file.patch);
     }
+    /**
+     * Parse the patch from github and properly set the objects attributes
+     *
+     * @param patch The patch from Github
+     */
     parsePatch(patch) {
         if (patch) {
             // The changes are included in the file
@@ -7905,7 +7956,7 @@ class ModifiedFile {
                 }
             }
         }
-        else if (core.getInput('check-renamed-files') === 'true') {
+        else if (ActionOptions_1.actionOptions.checkRenamedFiles) {
             // Take the all file
             this.additions.push(new FileLines({
                 start: 0,
@@ -7917,27 +7968,54 @@ class ModifiedFile {
             }));
         }
     }
+    /**
+     * Whether the file has addition
+     */
     get hasAdditions() {
         return !!this.additions.length;
     }
+    /**
+     * Whether the file has deletion
+     */
     get hasDeletions() {
         return !!this.deletions.length;
     }
+    /**
+     * Whether the file has changes (addition or deletion)
+     */
     get hasChanges() {
         return this.hasAdditions || this.hasDeletions;
     }
+    /**
+     * Check if a line is an addition of the file
+     *
+     * @param line
+     * @returns true if the line number is included in the added lines
+     */
     hasAdditionLine(line) {
         if (!this.hasAdditions) {
             return false;
         }
         return this.additions.some((fileLines) => fileLines.includes(line));
     }
+    /**
+     * Check if a line is a deletion of the file
+     *
+     * @param line
+     * @returns true if the line number is include in the deleted lines
+     */
     hasDeletionLine(line) {
         if (!this.hasDeletions) {
             return false;
         }
         return this.deletions.some((fileLines) => fileLines.includes(line));
     }
+    /**
+     * Check if a line is a change of the file
+     *
+     * @param line
+     * @returns true if the line is included in the changed lines
+     */
     hasLine(line) {
         return this.hasAdditionLine(line) || this.hasDeletionLine(line);
     }
@@ -7955,6 +8033,9 @@ class ModifiedFiles {
         this._resolveInit = resolveInit[0];
         this.init();
     }
+    /**
+     * Init the class
+     */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             const files = yield this.getGithubFiles();
@@ -7964,6 +8045,11 @@ class ModifiedFiles {
             this._resolveInit(true);
         });
     }
+    /**
+     * Get the modified files
+     *
+     * @returns
+     */
     getGithubFiles() {
         var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
@@ -8004,9 +8090,21 @@ class ModifiedFiles {
             return response.data.files;
         });
     }
+    /**
+     * Check whether a file is modified
+     *
+     * @param fileName
+     * @returns true if fileName is a modified file
+     */
     has(fileName) {
         return this.files.has(fileName);
     }
+    /**
+     * Get the modified file
+     *
+     * @param fileName
+     * @returns The modified file if it has been modified
+     */
     get(fileName) {
         return this.files.get(fileName);
     }

@@ -1,12 +1,13 @@
 import * as exec from '@actions/exec';
+import { actionOptions } from '../utils/ActionOptions';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { FormatResult } from './FormatResult';
 
-export async function format(params: {workingDirectory:string, modifiedFiles: ModifiedFiles }): Promise<FormatResult>{
+export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<FormatResult>{
   let output = '';
   let errOutputs = '';
 
-  const options: exec.ExecOptions = { cwd: params.workingDirectory };
+  const options: exec.ExecOptions = { cwd: actionOptions.workingDirectory };
   options.listeners = {
     stdout: (data) => {
       output += data.toString();

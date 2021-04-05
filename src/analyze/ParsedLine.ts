@@ -1,4 +1,5 @@
-import { failOn, FailOn } from "../utils/FailOn";
+import { actionOptions } from "../utils/ActionOptions";
+import { FailOnEnum } from "../utils/FailOn";
 import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum, DartAnalyzeLogTypeKey,} from "./DartAnalyzeLogType";
 
 export interface ParsedLineInterface {
@@ -42,15 +43,15 @@ export class ParsedLine {
   }
 
   public get isFail():boolean {
-    if (failOn !== FailOn.Nothing){
+    if (actionOptions.failOn !== FailOnEnum.Nothing){
       if (this.type === DartAnalyzeLogTypeEnum.Error) {
         return true;
       }
-      if (failOn !== FailOn.Error) {
+      if (actionOptions.failOn !== FailOnEnum.Error) {
         if (this.type === DartAnalyzeLogTypeEnum.Warning) {
           return true;
         }
-        if (failOn !== FailOn.Warning) {
+        if (actionOptions.failOn !== FailOnEnum.Warning) {
           // It is FailOn.Info
           return true;
         }

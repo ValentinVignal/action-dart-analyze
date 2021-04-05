@@ -1,4 +1,5 @@
-import { failOn, FailOn } from "../utils/FailOn";
+import { actionOptions } from "../utils/ActionOptions";
+import { FailOnEnum } from "../utils/FailOn";
 
 export interface FormatResultInterface {
   files: Set<string>;
@@ -12,7 +13,7 @@ export class FormatResult {
   }
 
   public get success(): boolean {
-    return failOn !== FailOn.Format || !this.files.size;
+    return actionOptions.failOn !== FailOnEnum.Format || !this.files.size;
   }
 
   public get count(): number {
