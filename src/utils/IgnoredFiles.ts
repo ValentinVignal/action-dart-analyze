@@ -1,25 +1,29 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
+// import { minimatch } from 'minimatch';
+import * as minimatch from 'minimatch';
 
 /**
  * The ignore files in the analysis_options.yaml
  */
 export class IgnoredFiles{
-  private readonly files: Set<string>;
+  private readonly patterns: minimatch.IMinimatch[];
   constructor() {
+    let patterns: string[];
     try {
-      const yamlFile = yaml.load(fs.readFileSync('./analysis_options.yml', 'utf8')) as {analyzer?: {exclude?: string[]}};
-      this.files = new Set(yamlFile?.analyzer?.exclude ?? []);
+      const yamlFile = yaml.load(fs.readFileSync('./analysis_options.yaml', 'utf8')) as {analyzer?: {exclude?: string[]}};
+      patterns = yamlFile?.analyzer?.exclude ?? [];
     } catch (error) {
-      this.files ??= new Set<string>();
       console.log(`Could not load analysis_options.yml:\n${error}`);
     }
+    patterns ??= [];
+    this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
   }
 
   /**
    * Whether a file is ignored
    */
   public has(file: string): boolean {
-    return this.files.has(file);
+    return this.patterns.some((pattern) => pattern.match(file));
   }
 }
