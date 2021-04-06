@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import { analyze } from './analyze/analyze';
 import { format } from './format/Format';
 import { Result } from './result/Result';
+import { IgnoredFiles } from './utils/IgnoredFiles';
 import { ModifiedFiles } from './utils/ModifiedFiles';
 
 /**
@@ -14,12 +15,16 @@ async function main(): Promise<void> {
     const modifiedFiles = new ModifiedFiles();
     await modifiedFiles.isInit;
 
+    const ignoredFiles = new IgnoredFiles();
+
     const analyzeResult = await analyze({
       modifiedFiles,
+      // `dart analyze` already doesn't check ignore files
     });
 
     const formatResult = await format({
       modifiedFiles,
+      ignoredFiles,
     });
 
     const result = new Result({

@@ -1,9 +1,10 @@
 import * as exec from '@actions/exec';
 import { actionOptions } from '../utils/ActionOptions';
+import { IgnoredFiles } from '../utils/IgnoredFiles';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { FormatResult } from './FormatResult';
 
-export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<FormatResult>{
+export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFiles: IgnoredFiles }): Promise<FormatResult>{
   let output = '';
   let errOutputs = '';
 
@@ -37,6 +38,9 @@ export async function format(params: { modifiedFiles: ModifiedFiles }): Promise<
     }
 
     const file = line.split(' ')[1];
+    if (params.ignoredFiles.has(file)) {
+      continue;
+    }
     if (params.modifiedFiles.has(file)) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);

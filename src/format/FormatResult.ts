@@ -23,7 +23,7 @@ export class FormatResult {
   public get commentBody(): string {
     const comments: string[] = [];
     for (const file of this.files) {
-      comments.push(`- [ ] ${actionOptions.emojis ? ":poop: " : ''} \`${file}\` is not formatted.`);
+      comments.push(`- ${actionOptions.emojis ? ":poop: " : ''} \`${file}\` is not formatted.`);
     }
     return comments.join('\n');
   }

@@ -70,7 +70,7 @@ export class Result {
   }
 
   private title(params?: {emojis?: boolean}): string {
-    const title = `Dart Analyzer found ${this.analyze.counts.total} issue${Result.pluralS(this.analyze.counts.total)}`;
+    const title = `Dart Analyzer found ${this.count} issue${Result.pluralS(this.count)}`;
     if (params?.emojis && actionOptions.emojis) {
       let emoji = ':tada:';
       if (this.analyze.counts.failCount) {
@@ -130,5 +130,12 @@ export class Result {
 
   private static pluralS(count: number): string {
     return count > 1 ? 's': '';
+  }
+
+  /**
+   * The total count of issues found
+   */
+  private get count() {
+    return this.analyze.counts.total + this.format.count;
   }
 }
