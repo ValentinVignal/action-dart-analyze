@@ -8,8 +8,8 @@ export interface FormatResultInterface {
 export class FormatResult {
   private readonly files: Set<string>;
 
-  constructor(params: FormatResultInterface) {
-    this.files = params.files;
+  constructor(params?: FormatResultInterface) {
+    this.files = params?.files ?? new Set<string>();
   }
 
   public get success(): boolean {

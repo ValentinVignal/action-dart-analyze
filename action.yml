@@ -25,6 +25,10 @@ inputs:
     description: 'Whether it should include emojis in the comment. Option: `false`, `true`. Default: `true`.'
     required: false
     default: 'true'
+  format:
+    description: 'Whether it should check the formatting. Options: `true`, `false`. Default: `true`.'
+    required: false
+    default: 'true'
 
 runs:
   using: 'node12'

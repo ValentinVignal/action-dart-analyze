@@ -62,10 +62,10 @@ export class Result {
         ...params,
         type: DartAnalyzeLogTypeEnum.Info,
       }),
-      this.titleLineFormat({
-        ...params,
-      })
     ];
+    if (actionOptions.format) {
+      messages.push(this.titleLineFormat({ ...params, }));
+    }
     return messages.join('\n');
   }
 
@@ -123,7 +123,7 @@ export class Result {
    * Log the results in the github action
    */
   public log(): void {
-    const logger = this.success ? core.warning : core.setFailed;
+    const logger = this.success ? (this.count ? core.warning : core.info) : core.setFailed;
     logger(this.issueCountMessage());
     
   }

@@ -12860,7 +12860,8 @@ const ActionOptions_1 = __nccwpck_require__(3615);
 const FailOn_1 = __nccwpck_require__(1613);
 class FormatResult {
     constructor(params) {
-        this.files = params.files;
+        var _a;
+        this.files = (_a = params === null || params === void 0 ? void 0 : params.files) !== null && _a !== void 0 ? _a : new Set();
     }
     get success() {
         return ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Format || !this.files.size;
@@ -13033,8 +13034,10 @@ class Result {
             this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Error })),
             this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Warning })),
             this.titleLineAnalyze(Object.assign(Object.assign({}, params), { type: DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info })),
-            this.titleLineFormat(Object.assign({}, params))
         ];
+        if (ActionOptions_1.actionOptions.format) {
+            messages.push(this.titleLineFormat(Object.assign({}, params)));
+        }
         return messages.join('\n');
     }
     title(params) {
@@ -13089,7 +13092,7 @@ class Result {
      * Log the results in the github action
      */
     log() {
-        const logger = this.success ? core.warning : core.setFailed;
+        const logger = this.success ? (this.count ? core.warning : core.info) : core.setFailed;
         logger(this.issueCountMessage());
     }
     static pluralS(count) {
@@ -13146,6 +13149,7 @@ class ActionOptions {
         this.token = core.getInput('token', { required: true });
         this.checkRenamedFiles = core.getInput('check-renamed-files', { required: true }) === 'true';
         this.emojis = core.getInput('emojis', { required: true }) === 'true';
+        this.format = core.getInput('format', { required: true }) === 'true';
     }
 }
 /**
