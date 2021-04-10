@@ -229,14 +229,6 @@ export class ModifiedFiles {
           "Please submit an issue on this action's GitHub repo."
       )
     }
-
-    // Ensure that the head commit is ahead of the base commit.
-    if (response.data.status !== 'ahead') {
-      core.setFailed(
-        `The head commit for this ${context.eventName} event is not ahead of the base commit. ` +
-          "Please submit an issue on this action's GitHub repo."
-      )
-    }
     return response.data.files;
   }
 
