@@ -5,6 +5,9 @@ import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { FormatResult } from './FormatResult';
 
 export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFiles: IgnoredFiles }): Promise<FormatResult>{
+  if (!actionOptions.format) {
+    return new FormatResult();
+  }
   let output = '';
   let errOutputs = '';
 

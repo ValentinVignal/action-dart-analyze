@@ -12805,6 +12805,9 @@ const ActionOptions_1 = __nccwpck_require__(3615);
 const FormatResult_1 = __nccwpck_require__(6290);
 function format(params) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!ActionOptions_1.actionOptions.format) {
+            return new FormatResult_1.FormatResult();
+        }
         let output = '';
         let errOutputs = '';
         console.log('::group:: Analyze formatting');
@@ -13003,9 +13006,18 @@ const FailOn_1 = __nccwpck_require__(1613);
  */
 class Result {
     constructor(params) {
+        /**
+         * Dart analyze result
+         */
         this.analyze = params.analyze;
+        /**
+         * Dart format result
+         */
         this.format = params.format;
     }
+    /**
+     * Whether it is a success or not
+     */
     get success() {
         return this.analyze.success && this.format.success;
     }
@@ -13028,6 +13040,12 @@ class Result {
             yield Comment_1.comment({ message: messages.join('\n---\n') });
         });
     }
+    /**
+     * Summary of the analysis put in the comment and in the console
+     *
+     * @param params
+     * @returns
+     */
     issueCountMessage(params) {
         const messages = [
             this.title(params),
@@ -13040,6 +13058,12 @@ class Result {
         }
         return messages.join('\n');
     }
+    /**
+     * Global title put in the comment or in the console at the end of the analysis
+     *
+     * @param params
+     * @returns
+     */
     title(params) {
         const title = `Dart Analyzer found ${this.count} issue${Result.pluralS(this.count)}`;
         if ((params === null || params === void 0 ? void 0 : params.emojis) && ActionOptions_1.actionOptions.emojis) {
@@ -13056,6 +13080,12 @@ class Result {
             return title;
         }
     }
+    /**
+     * Line title for a specific dart analysis category
+     *
+     * @param params
+     * @returns
+     */
     titleLineAnalyze(params) {
         const isFail = DartAnalyzeLogType_1.DartAnalyzeLogType.isFail(params.type);
         let emoji = '';
@@ -13083,6 +13113,12 @@ class Result {
         line = `- ${params.emojis && ActionOptions_1.actionOptions.emojis ? emoji : ''}${highlight}${line}.${highlight}`;
         return line;
     }
+    /**
+     * Line title for the formatting issues
+     *
+     * @param params
+     * @returns
+     */
     titleLineFormat(params) {
         let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
         const highlight = params.emojis && this.format.count && ActionOptions_1.actionOptions.failOn === FailOn_1.FailOnEnum.Format ? '**' : '';
@@ -13095,6 +13131,11 @@ class Result {
         const logger = this.success ? (this.count ? core.warning : core.info) : core.setFailed;
         logger(this.issueCountMessage());
     }
+    /**
+     *
+     * @param count
+     * @returns 's' if count > 1, else ''
+     */
     static pluralS(count) {
         return count > 1 ? 's' : '';
     }

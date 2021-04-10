@@ -19,10 +19,19 @@ export class Result {
   format: FormatResult;
 
   constructor(params: ResultInterface) {
+    /**
+     * Dart analyze result
+     */
     this.analyze = params.analyze;
+    /**
+     * Dart format result
+     */
     this.format = params.format;
   }
 
+  /**
+   * Whether it is a success or not
+   */
   public get success():boolean {
     return this.analyze.success && this.format.success;
   }
@@ -47,6 +56,12 @@ export class Result {
     await comment({message: messages.join('\n---\n')});
   }
 
+  /**
+   * Summary of the analysis put in the comment and in the console
+   * 
+   * @param params 
+   * @returns 
+   */
   private issueCountMessage(params?: {emojis?: boolean}): string {
     const messages: string[] = [
       this.title(params),
@@ -69,6 +84,12 @@ export class Result {
     return messages.join('\n');
   }
 
+  /**
+   * Global title put in the comment or in the console at the end of the analysis
+   * 
+   * @param params 
+   * @returns 
+   */
   private title(params?: {emojis?: boolean}): string {
     const title = `Dart Analyzer found ${this.count} issue${Result.pluralS(this.count)}`;
     if (params?.emojis && actionOptions.emojis) {
@@ -84,6 +105,12 @@ export class Result {
     }
   }
 
+  /**
+   * Line title for a specific dart analysis category
+   * 
+   * @param params 
+   * @returns 
+   */
   private titleLineAnalyze(params: {emojis?: boolean, type: DartAnalyzeLogTypeEnum}): string {
     const isFail = DartAnalyzeLogType.isFail(params.type);
     let emoji = '';
@@ -113,11 +140,17 @@ export class Result {
     return line;
   }
 
-    private titleLineFormat(params: {emojis?: boolean}):string {
-      let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
-      const highlight = params.emojis && this.format.count && actionOptions.failOn === FailOnEnum.Format ? '**' : '';
-      return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
-    }
+  /**
+   * Line title for the formatting issues
+   * 
+   * @param params 
+   * @returns 
+   */
+  private titleLineFormat(params: {emojis?: boolean}):string {
+    let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
+    const highlight = params.emojis && this.format.count && actionOptions.failOn === FailOnEnum.Format ? '**' : '';
+    return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
+  }
 
   /**
    * Log the results in the github action
@@ -128,6 +161,11 @@ export class Result {
     
   }
 
+  /**
+   * 
+   * @param count 
+   * @returns 's' if count > 1, else '' 
+   */
   private static pluralS(count: number): string {
     return count > 1 ? 's': '';
   }
