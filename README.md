@@ -12,7 +12,7 @@ Create a `.yml` file in `./github/workflows/` in your project.
   - Options:
     - `'error'`: Fails only on analyze error.
     - `'warning'`: Fails on warnings and errors.
-    - `'info`: Fails on info, warnings and errors from `dart analyze`.
+    - `'info'`: Fails on info, warnings and errors from `dart analyze`.
     - `'format'`: Fails on everything, including bad formatting.
     - `'nothing'`: Fails on nothing.
   - Optional.
@@ -28,6 +28,10 @@ Create a `.yml` file in `./github/workflows/` in your project.
   - Optional.
   - Default: `'false'`.
 - `emojis`: `'false'` will remove the emojis from the comment.
+  - Options: `'true'`, `'false'`.
+  - Optional.
+  - Default: `'true'`.
+- `format`: `'false'` will remove the check on the format.
   - Options: `'true'`, `'false'`.
   - Optional.
   - Default: `'true'`.
