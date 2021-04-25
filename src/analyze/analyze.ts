@@ -85,7 +85,7 @@ export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<A
       console.log(`::${DartAnalyzeLogType.keyFromType(parsedLine.type)} ${message}`); // Log the issue
 
     } catch (error) {
-      console.log(`Error analyzing line ${line}:\n${error}`);
+      // This is not a log line
     }
   } 
   console.log('::endgroup::');

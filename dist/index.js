@@ -12504,7 +12504,7 @@ class AnalyzeResult {
                 failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
             }
             const highlight = line.isFail ? '**' : '';
-            comments.push(`- ${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji : ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}.`);
+            comments.push(`- ${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji + ' ' : ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}.`);
         }
         return comments.join('\n');
     }
@@ -12746,7 +12746,7 @@ function analyze(params) {
                 console.log(`::${DartAnalyzeLogType_1.DartAnalyzeLogType.keyFromType(parsedLine.type)} ${message}`); // Log the issue
             }
             catch (error) {
-                console.log(`Error analyzing line ${line}:\n${error}`);
+                // This is not a log line
             }
         }
         console.log('::endgroup::');
@@ -13591,11 +13591,6 @@ class ModifiedFiles {
             // Ensure that the request was successful.
             if (response.status !== 200) {
                 core.setFailed(`The GitHub API for comparing the base and head commits for this ${utils_1.context.eventName} event returned ${response.status}, expected 200. ` +
-                    "Please submit an issue on this action's GitHub repo.");
-            }
-            // Ensure that the head commit is ahead of the base commit.
-            if (response.data.status !== 'ahead') {
-                core.setFailed(`The head commit for this ${utils_1.context.eventName} event is not ahead of the base commit. ` +
                     "Please submit an issue on this action's GitHub repo.");
             }
             return response.data.files;

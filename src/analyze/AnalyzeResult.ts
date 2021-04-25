@@ -87,7 +87,7 @@ export class AnalyzeResult {
         failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
       }
       const highlight = line.isFail ? '**': '';
-      comments.push(`- ${actionOptions.emojis ? failEmoji + line.emoji: ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}.`);
+      comments.push(`- ${actionOptions.emojis ? failEmoji + line.emoji + ' ' : ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}.`);
     }
     return comments.join('\n');
   }
