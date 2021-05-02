@@ -1,35 +1,38 @@
-name: 'Dart Analyze'
-description: 'Analyze a dart code'
-author: 'Valentin Vignal'
+name: "Dart Analyze"
+description: "Analyze a dart code"
+author: "Valentin Vignal"
 branding:
-  icon: 'check-circle'
-  color: 'gray-dark'
+  icon: "check-circle"
+  color: "gray-dark"
 inputs:
   fail-on:
-    description: 'When the action will fail. Optional. Option: `error`, `warning`, `info`, `format`, `nothing`. Default: `error`.'
-    default: 'error'
+    description: "When the action will fail. Optional. Option: `error`, `warning`, `info`, `format`, `nothing`. Default: `error`."
+    default: "error"
     required: false
   working-directory:
-    description: 'The working directory. Optional. Default: `./`.'
+    description: "The working directory. Optional. Default: `./`."
     default: ./
     required: false
   token:
-    description: 'The github token.'
+    description: "The github token."
     required: false
     default: ${{ github.token }}
   check-renamed-files:
-    description: 'Whether it should check the renamed files with no changes. Options: `false`, `true`. Default: `false`.'
+    description: "Whether it should check the renamed files with no changes. Options: `false`, `true`. Default: `false`."
     required: false
-    default: 'false'
-  emojis: 
-    description: 'Whether it should include emojis in the comment. Option: `false`, `true`. Default: `true`.'
+    default: "false"
+  emojis:
+    description: "Whether it should include emojis in the comment. Option: `false`, `true`. Default: `true`."
     required: false
-    default: 'true'
+    default: "true"
   format:
-    description: 'Whether it should check the formatting. Options: `true`, `false`. Default: `true`.'
+    description: "Whether it should check the formatting. Options: `true`, `false`. Default: `true`."
     required: false
-    default: 'true'
+    default: "true"
+  line-length:
+    description: "The line length for that dart format command. Default: default value for `flutter format`."
+    required: false
 
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"

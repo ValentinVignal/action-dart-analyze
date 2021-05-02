@@ -4,7 +4,7 @@ import { IgnoredFiles } from '../utils/IgnoredFiles';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { FormatResult } from './FormatResult';
 
-export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFiles: IgnoredFiles }): Promise<FormatResult>{
+export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFiles: IgnoredFiles }): Promise<FormatResult> {
   if (!actionOptions.format) {
     return new FormatResult();
   }
@@ -23,8 +23,15 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
     }
   };
 
+  const args: string[] = ['-o', 'none'];
+  if (actionOptions.lineLength) {
+    args.push('--line-length');
+    args.push(actionOptions.lineLength.toString());
+  }
+  args.push('.');
+
   try {
-    await exec.exec('dart format -o none .', [], options);
+    await exec.exec('dart format', args, options);
   } catch (_) {
 
   }
