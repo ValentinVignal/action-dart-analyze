@@ -35,6 +35,9 @@ Create a `.yml` file in `./github/workflows/` in your project.
   - Options: `'true'`, `'false'`.
   - Optional.
   - Default: `'true'`.
+- `line-length`: The line length for dart format command.
+  - Optional.
+  - Default: The default value used in `dart format`
 
 ## Outputs
 
