@@ -12820,8 +12820,14 @@ function format(params) {
                 errOutputs += data.toString();
             }
         };
+        const args = ['-o', 'none'];
+        if (ActionOptions_1.actionOptions.lineLength) {
+            args.push('--line-length');
+            args.push(ActionOptions_1.actionOptions.lineLength.toString());
+        }
+        args.push('.');
         try {
-            yield exec.exec('dart format -o none .', [], options);
+            yield exec.exec('dart format', args, options);
         }
         catch (_) {
         }
@@ -13191,6 +13197,12 @@ class ActionOptions {
         this.checkRenamedFiles = core.getInput('check-renamed-files', { required: true }) === 'true';
         this.emojis = core.getInput('emojis', { required: true }) === 'true';
         this.format = core.getInput('format', { required: true }) === 'true';
+        try {
+            this.lineLength = parseInt(core.getInput('line-length', { required: true }));
+        }
+        catch (_) {
+            this.lineLength = null;
+        }
     }
 }
 /**

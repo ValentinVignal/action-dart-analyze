@@ -11,13 +11,13 @@ import { actionOptions } from '../utils/ActionOptions';
  * @param params 
  * @returns The result of `dart analyze`
  */
-export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<AnalyzeResult> {
+export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise<AnalyzeResult> {
   let outputs = '';
   let errOutputs = '';
 
   console.log('::group:: Analyze dart code')
 
-  const options: exec.ExecOptions = {cwd: actionOptions.workingDirectory};
+  const options: exec.ExecOptions = { cwd: actionOptions.workingDirectory };
 
   options.listeners = {
     stdout: (data) => {
@@ -27,7 +27,7 @@ export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<A
       errOutputs += data.toString();
     }
   };
-  
+
   const args = [actionOptions.workingDirectory];
 
   try {
@@ -71,7 +71,7 @@ export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<A
       }
       const message = `file=${parsedLine.file},line=${parsedLine.line},col=${parsedLine.column}::${parsedLine.message}. See ${parsedLine.urls[0]}`;
 
-      switch(parsedLine.type) {
+      switch (parsedLine.type) {
         case DartAnalyzeLogTypeEnum.Error:
           errorCount++;
           break;
@@ -87,7 +87,7 @@ export async function analyze(params: {modifiedFiles: ModifiedFiles}): Promise<A
     } catch (error) {
       // This is not a log line
     }
-  } 
+  }
   console.log('::endgroup::');
 
   return new AnalyzeResult({

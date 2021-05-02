@@ -29,6 +29,9 @@ inputs:
     description: 'Whether it should check the formatting. Options: `true`, `false`. Default: `true`.'
     required: false
     default: 'true'
+  line-length:
+    description: 'The line length for the formatting. Default: default value for `flutter format`.'
+    required: false
 
 runs:
   using: 'node12'
