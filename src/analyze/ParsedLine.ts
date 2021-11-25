@@ -18,28 +18,27 @@ export class ParsedLine {
   readonly line: number;
   readonly column: number;
   readonly message: string;
-  readonly urls: [string] | [string, string];
+  readonly urls: [string, string];
   readonly type: DartAnalyzeLogTypeEnum
   readonly originalLine: string;
+  readonly lintName: string;
 
   constructor(params: { line: string, delimiter?: string }) {
     this.originalLine = params.line; // 'INFO|LINT|PREFER_CONST_CONSTRUCTORS|/path/to/file.dart|96|13|80|Prefer const with constant constructors.'
     const lineData = params.line.split(params?.delimiter ?? '|'); // ['INFO', 'LINT', 'PREFER_CONST_CONSTRUCTORS', '/path/to/file.dart', '96', '13', '80', 'Prefer const with constant constructors.']
     this.type = DartAnalyzeLogType.typeFromKey(lineData[0] as DartAnalyzeLogTypeKey);
-    const lintMessage = lineData[7]; // 'Prefer const with constant constructors.'
-    const file = path.join(lineData[3]); // '/path/to/file.dart'
+    this.message = lineData[7]; // 'Prefer const with constant constructors.'
+    this.file = path.join(lineData[3]); // '/path/to/file.dart'
     const lineNumber = lineData[4]; // '96'
     const columnNumber = lineData[5]; // '13'
     const lintName = lineData[2].toLowerCase(); // 'PREFER_CONST_CONSTRUCTORS'
-    const lintNameLowerCase = lintName.toLowerCase();  // 'prefer_const_constructors'
+    this.lintName = lintName.toLowerCase();  // 'prefer_const_constructors'
     this.urls = [
-      `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`,
-      `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`,
+      `https://dart.dev/tools/diagnostic-messages#${this.lintName}`,
+      `https://dart-lang.github.io/linter/lints/${this.lintName}.html`,
     ];
-    this.file = file;
     this.line = parseInt(lineNumber);
     this.column = parseInt(columnNumber);
-    this.message = lintMessage;
   }
 
   public get isFail(): boolean {
@@ -69,5 +68,9 @@ export class ParsedLine {
       case DartAnalyzeLogTypeEnum.Info:
         return ':eyes:'
     }
+  }
+
+  public get humanReadableString(): string {
+    return `${DartAnalyzeLogType.typeToString(this.type)} - \`${path.relative(process.env.GITHUB_WORKSPACE!, this.file)}\`:${this.line}:${this.column} - ${this.message} (${this.lintName}).`;
   }
 }

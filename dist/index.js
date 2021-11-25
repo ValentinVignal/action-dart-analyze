@@ -12439,16 +12439,13 @@ class AnalyzeResult {
     get commentBody() {
         const comments = [];
         for (const line of this.lines) {
-            let urls = `[link](${line.urls[0]})`;
-            if (line.urls.length > 1) {
-                urls += ` or [link](${line.urls[1]})`;
-            }
+            let urls = `See [link](${line.urls[0]}) or [link](${line.urls[1]}).`;
             let failEmoji = '';
             if (![FailOn_1.FailOnEnum.Nothing, FailOn_1.FailOnEnum.Format, FailOn_1.FailOnEnum.Info].includes(ActionOptions_1.actionOptions.failOn)) {
                 failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
             }
             const highlight = line.isFail ? '**' : '';
-            comments.push(`- ${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji + ' ' : ''}${highlight}${line.originalLine.trim().replace(line.file, `\`${line.file}\``)}.${highlight} See ${urls}.`);
+            comments.push(`- ${ActionOptions_1.actionOptions.emojis ? failEmoji + line.emoji + ' ' : ''}${highlight}${line.humanReadableString}${highlight} ${urls}`);
         }
         return comments.join('\n');
     }
@@ -12512,6 +12509,16 @@ class DartAnalyzeLogType {
                 return logType === DartAnalyzeLogTypeEnum.Error;
         }
     }
+    static typeToString(logType) {
+        switch (logType) {
+            case DartAnalyzeLogTypeEnum.Info:
+                return 'Info';
+            case DartAnalyzeLogTypeEnum.Warning:
+                return 'Warning';
+            case DartAnalyzeLogTypeEnum.Error:
+                return 'Error';
+        }
+    }
 }
 exports.DartAnalyzeLogType = DartAnalyzeLogType;
 
@@ -12538,20 +12545,18 @@ class ParsedLine {
         this.originalLine = params.line; // 'INFO|LINT|PREFER_CONST_CONSTRUCTORS|/path/to/file.dart|96|13|80|Prefer const with constant constructors.'
         const lineData = params.line.split((_a = params === null || params === void 0 ? void 0 : params.delimiter) !== null && _a !== void 0 ? _a : '|'); // ['INFO', 'LINT', 'PREFER_CONST_CONSTRUCTORS', '/path/to/file.dart', '96', '13', '80', 'Prefer const with constant constructors.']
         this.type = DartAnalyzeLogType_1.DartAnalyzeLogType.typeFromKey(lineData[0]);
-        const lintMessage = lineData[7]; // 'Prefer const with constant constructors.'
-        const file = path_1.default.join(lineData[3]); // '/path/to/file.dart'
+        this.message = lineData[7]; // 'Prefer const with constant constructors.'
+        this.file = path_1.default.join(lineData[3]); // '/path/to/file.dart'
         const lineNumber = lineData[4]; // '96'
         const columnNumber = lineData[5]; // '13'
         const lintName = lineData[2].toLowerCase(); // 'PREFER_CONST_CONSTRUCTORS'
-        const lintNameLowerCase = lintName.toLowerCase(); // 'prefer_const_constructors'
+        this.lintName = lintName.toLowerCase(); // 'prefer_const_constructors'
         this.urls = [
-            `https://dart.dev/tools/diagnostic-messages#${lintNameLowerCase}`,
-            `https://dart-lang.github.io/linter/lints/${lintNameLowerCase}.html`,
+            `https://dart.dev/tools/diagnostic-messages#${this.lintName}`,
+            `https://dart-lang.github.io/linter/lints/${this.lintName}.html`,
         ];
-        this.file = file;
         this.line = parseInt(lineNumber);
         this.column = parseInt(columnNumber);
-        this.message = lintMessage;
     }
     get isFail() {
         if (ActionOptions_1.actionOptions.failOn !== FailOn_1.FailOnEnum.Nothing) {
@@ -12579,6 +12584,9 @@ class ParsedLine {
             case DartAnalyzeLogType_1.DartAnalyzeLogTypeEnum.Info:
                 return ':eyes:';
         }
+    }
+    get humanReadableString() {
+        return `${DartAnalyzeLogType_1.DartAnalyzeLogType.typeToString(this.type)} - \`${path_1.default.relative(process.env.GITHUB_WORKSPACE, this.file)}\`:${this.line}:${this.column} - ${this.message} (${this.lintName}).`;
     }
 }
 exports.ParsedLine = ParsedLine;

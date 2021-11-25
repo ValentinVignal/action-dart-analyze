@@ -52,6 +52,17 @@ export class DartAnalyzeLogType {
         return logType === DartAnalyzeLogTypeEnum.Error;
     }
   }
+
+  public static typeToString(logType: DartAnalyzeLogTypeEnum): string {
+    switch (logType) {
+      case DartAnalyzeLogTypeEnum.Info:
+        return 'Info';
+      case DartAnalyzeLogTypeEnum.Warning:
+        return 'Warning';
+      case DartAnalyzeLogTypeEnum.Error:
+        return 'Error';
+    }
+  }
 }
 
 
