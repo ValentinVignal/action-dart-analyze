@@ -9,7 +9,7 @@ export enum DartAnalyzeLogTypeEnum {
 
 export type DartAnalyzeLogTypeKey = 'INFO' | 'WARNING' | 'ERROR';
 
-export type LogKey = 'INFO' | 'WARNING' | 'ERROR';
+export type LogKey = 'WARNING' | 'ERROR';
 
 export class DartAnalyzeLogType {
   public static typeFromKey(key: DartAnalyzeLogTypeKey): DartAnalyzeLogTypeEnum {
@@ -23,14 +23,17 @@ export class DartAnalyzeLogType {
     }
   }
 
+  /**
+   * 
+   * @param logType 
+   * @returns The Github key for the log type.
+   */
   public static keyFromType(logType: DartAnalyzeLogTypeEnum): LogKey {
     switch (logType) {
       case DartAnalyzeLogTypeEnum.Error:
         return 'ERROR';
-      case DartAnalyzeLogTypeEnum.Warning:
-        return 'WARNING';
       default:
-        return 'INFO';
+        return 'WARNING';
     }
   }
 

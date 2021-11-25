@@ -1,7 +1,8 @@
-import * as github from '@actions/github';
 import * as core from '@actions/core';
-import { EventName } from '../actions/github/EventName';
+import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
+import path from 'path';
+import { EventName } from '../actions/github/EventName';
 import { actionOptions } from './ActionOptions';
 
 interface FileLinesInterface {
@@ -40,7 +41,7 @@ class ModifiedFile {
   readonly deletions: FileLines[];
   readonly additions: FileLines[];
 
-  constructor(file: {filename: string, patch?: string|undefined}) {
+  constructor(file: { filename: string, patch?: string | undefined }) {
     this.name = file.filename;
     this.additions = [];
     this.deletions = [];
@@ -53,7 +54,7 @@ class ModifiedFile {
    * 
    * @param patch The patch from Github
    */
-  private parsePatch(patch?: string|undefined): void {
+  private parsePatch(patch?: string | undefined): void {
     if (patch) {
       // The changes are included in the file
       const patches = patch.split('@@').filter((_, index) => index % 2); // Only take the line information
@@ -84,12 +85,12 @@ class ModifiedFile {
     } else if (actionOptions.checkRenamedFiles) {
       // Take the all file
       this.additions.push(new FileLines({
-          start: 0,
-          end: Infinity,
+        start: 0,
+        end: Infinity,
       }));
       this.deletions.push(new FileLines({
-          start: 0,
-          end: Infinity,
+        start: 0,
+        end: Infinity,
       }));
     }
   }
@@ -180,7 +181,7 @@ export class ModifiedFiles {
   private async init(): Promise<void> {
     const files = await this.getGithubFiles();
     for (const file of files) {
-      this.files.set(file.filename, new ModifiedFile(file));
+      this.files.set(path.join(process.env.GITHUB_WORKSPACE!, file.filename), new ModifiedFile(file));
     }
     this._resolveInit(true);
   }
@@ -191,7 +192,7 @@ export class ModifiedFiles {
    * 
    * @returns 
    */
-  private async getGithubFiles(): Promise<{filename: string, patch?: string|undefined}[]>{
+  private async getGithubFiles(): Promise<{ filename: string, patch?: string | undefined }[]> {
     const eventName = github.context.eventName as EventName;
     let base = '';
     let head = '';
@@ -208,13 +209,13 @@ export class ModifiedFiles {
       default:
         core.setFailed(
           `This action only supports pull requests and pushes, ${github.context.eventName} events are not supported. ` +
-            "Please submit an issue on this action's GitHub repo if you believe this in correct."
+          "Please submit an issue on this action's GitHub repo if you believe this in correct."
         );
     }
 
     /// Github client from API token
-    const client = github.getOctokit(core.getInput('token', {required: true}));
-    
+    const client = github.getOctokit(core.getInput('token', { required: true }));
+
     const response = await client.repos.compareCommits({
       base,
       head,
@@ -226,7 +227,7 @@ export class ModifiedFiles {
     if (response.status !== 200) {
       core.setFailed(
         `The GitHub API for comparing the base and head commits for this ${context.eventName} event returned ${response.status}, expected 200. ` +
-          "Please submit an issue on this action's GitHub repo."
+        "Please submit an issue on this action's GitHub repo."
       )
     }
     return response.data.files;
@@ -248,7 +249,7 @@ export class ModifiedFiles {
    * @param fileName 
    * @returns The modified file if it has been modified
    */
-  public get(fileName: string): ModifiedFile|undefined {
+  public get(fileName: string): ModifiedFile | undefined {
     return this.files.get(fileName);
   }
 }

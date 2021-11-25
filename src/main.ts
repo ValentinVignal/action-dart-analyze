@@ -1,10 +1,10 @@
 import * as core from '@actions/core';
-
 import { analyze } from './analyze/analyze';
 import { format } from './format/Format';
 import { Result } from './result/Result';
 import { IgnoredFiles } from './utils/IgnoredFiles';
 import { ModifiedFiles } from './utils/ModifiedFiles';
+
 
 /**
  * Run the action

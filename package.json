@@ -31,7 +31,10 @@
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
-    "@types/js-yaml": "^4.0.0",
-    "@types/minimatch": "^3.0.4"
+    "@types/js-yaml": "^4.0.5",
+    "@types/minimatch": "^3.0.4",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^3.0.4",
+    "path": "^0.12.7"
   }
 }

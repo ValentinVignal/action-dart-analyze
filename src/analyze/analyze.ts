@@ -1,9 +1,9 @@
 import * as exec from '@actions/exec';
-import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from './DartAnalyzeLogType';
-import { AnalyzeResult } from './AnalyzeResult';
-import { ParsedLine } from './ParsedLine';
-import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { actionOptions } from '../utils/ActionOptions';
+import { ModifiedFiles } from '../utils/ModifiedFiles';
+import { AnalyzeResult } from './AnalyzeResult';
+import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from './DartAnalyzeLogType';
+import { ParsedLine } from './ParsedLine';
 
 /**
  * Runs `dart analyze`
@@ -14,6 +14,7 @@ import { actionOptions } from '../utils/ActionOptions';
 export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise<AnalyzeResult> {
   let outputs = '';
   let errOutputs = '';
+
 
   console.log('::group:: Analyze dart code')
 
