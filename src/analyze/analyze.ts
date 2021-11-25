@@ -31,7 +31,7 @@ export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise
   const args = [actionOptions.workingDirectory];
 
   try {
-    await exec.exec('dart analyze', args, options);
+    await exec.exec('dart analyze --format machine', args, options);
   } catch (_) {
     // dart analyze sometimes fails
   }
@@ -41,7 +41,7 @@ export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise
   let infoCount = 0;
   const lines = outputs.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
-  const delimiter = '-';
+  const delimiter = '|';
 
   const parsedLines: ParsedLine[] = [];
 

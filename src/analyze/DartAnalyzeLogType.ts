@@ -1,22 +1,22 @@
 import { actionOptions } from "../utils/ActionOptions";
 import { FailOnEnum } from "../utils/FailOn";
 
-export enum DartAnalyzeLogTypeEnum{
+export enum DartAnalyzeLogTypeEnum {
   Info = 1,
   Warning = 2,
   Error = 3,
 }
 
-export type DartAnalyzeLogTypeKey = 'info'|'warning'|'error';
+export type DartAnalyzeLogTypeKey = 'INFO' | 'WARNING' | 'ERROR';
 
-export type LogKey = 'warning'|'error';
+export type LogKey = 'INFO' | 'WARNING' | 'ERROR';
 
 export class DartAnalyzeLogType {
   public static typeFromKey(key: DartAnalyzeLogTypeKey): DartAnalyzeLogTypeEnum {
-    switch(key) {
-      case 'error':
+    switch (key) {
+      case 'ERROR':
         return DartAnalyzeLogTypeEnum.Error;
-      case 'warning':
+      case 'WARNING':
         return DartAnalyzeLogTypeEnum.Warning;
       default:
         return DartAnalyzeLogTypeEnum.Info;
@@ -26,9 +26,11 @@ export class DartAnalyzeLogType {
   public static keyFromType(logType: DartAnalyzeLogTypeEnum): LogKey {
     switch (logType) {
       case DartAnalyzeLogTypeEnum.Error:
-        return 'error';
+        return 'ERROR';
+      case DartAnalyzeLogTypeEnum.Warning:
+        return 'WARNING';
       default:
-        return 'warning';
+        return 'INFO';
     }
   }
 
