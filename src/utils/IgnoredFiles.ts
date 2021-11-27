@@ -15,7 +15,7 @@ export class IgnoredFiles {
       const yamlFile = yaml.load(fs.readFileSync(path.resolve(actionOptions.workingDirectory, 'analysis_options.yaml'), 'utf8')) as { analyzer?: { exclude?: string[] } };
       patterns = yamlFile?.analyzer?.exclude ?? [];
     } catch (error) {
-      console.log(`Could not load analysis_options.yaml:\n${error}`);
+      console.log('Could not load analysis_options.yaml:\n', error);
     }
     patterns ??= [];
     this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
