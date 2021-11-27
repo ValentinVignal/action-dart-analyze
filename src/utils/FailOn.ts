@@ -1,4 +1,4 @@
-export enum FailOnEnum{
+export enum FailOnEnum {
   Error = 0,
   Warning = 1,
   Info = 2,
@@ -8,7 +8,7 @@ export enum FailOnEnum{
 
 export class FailOn {
   static fromInput(input: string) {
-    switch(input) {
+    switch (input) {
       case 'nothing':
         return FailOnEnum.Nothing;
       case 'format':

@@ -1,6 +1,5 @@
-import * as yaml from 'js-yaml';
 import * as fs from 'fs';
-// import { minimatch } from 'minimatch';
+import * as yaml from 'js-yaml';
 import * as minimatch from 'minimatch';
 import * as path from 'path';
 import { actionOptions } from './ActionOptions';
@@ -13,7 +12,7 @@ export class IgnoredFiles {
   constructor() {
     let patterns: string[];
     try {
-      const yamlFile = yaml.load(fs.readFileSync(path.resolve(actionOptions.workingDirectory, './analysis_options.yaml'), 'utf8')) as { analyzer?: { exclude?: string[] } };
+      const yamlFile = yaml.load(fs.readFileSync(path.resolve(actionOptions.workingDirectory, 'analysis_options.yaml'), 'utf8')) as { analyzer?: { exclude?: string[] } };
       patterns = yamlFile?.analyzer?.exclude ?? [];
     } catch (error) {
       console.log(`Could not load analysis_options.yaml:\n${error}`);

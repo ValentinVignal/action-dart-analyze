@@ -1,16 +1,16 @@
-import * as github from '@actions/github';
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
 
-export type CommentReact = '+1'|'-1'|'laugh'|'confused'|'heart'|'hooray'|'rocket'|'eyes';
+export type CommentReact = '+1' | '-1' | 'laugh' | 'confused' | 'heart' | 'hooray' | 'rocket' | 'eyes';
 
-export async function comment(params: {message: string, reacts?: CommentReact[]}): Promise<void> {
+export async function comment(params: { message: string, reacts?: CommentReact[] }): Promise<void> {
 
   if (!github.context.payload.pull_request) {
     // Can only comment on Pull Requests
     return;
   }
-  const octokit = github.getOctokit(core.getInput('token', {required: true}));
+  const octokit = github.getOctokit(core.getInput('token', { required: true }));
 
   // Create the comment
   try {
@@ -36,6 +36,6 @@ export async function comment(params: {message: string, reacts?: CommentReact[]}
     }
   } catch (error) {
     console.log(`Couldn't comment "${params.message} with reacts ${params.reacts}`);
-  } 
+  }
 }
 

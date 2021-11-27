@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as path from 'path';
-import { FailOn, FailOnEnum } from "./FailOn"
+import { FailOn, FailOnEnum } from "./FailOn";
 
 /**
  * Contains all the options of the action

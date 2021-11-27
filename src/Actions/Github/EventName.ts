@@ -1,1 +1,1 @@
-export type EventName = 'pull_request'|'push';
+export type EventName = 'pull_request' | 'push';

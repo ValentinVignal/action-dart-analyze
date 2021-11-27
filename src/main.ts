@@ -5,7 +5,6 @@ import { Result } from './result/Result';
 import { IgnoredFiles } from './utils/IgnoredFiles';
 import { ModifiedFiles } from './utils/ModifiedFiles';
 
-
 /**
  * Run the action
  */
@@ -36,10 +35,9 @@ async function main(): Promise<void> {
       await result.comment();
     }
     result.log();
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(`error: ${error.message}`);
   }
-
 }
 
 main();

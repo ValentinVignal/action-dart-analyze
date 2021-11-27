@@ -32,7 +32,7 @@ export class Result {
   /**
    * Whether it is a success or not
    */
-  public get success():boolean {
+  public get success(): boolean {
     return this.analyze.success && this.format.success;
   }
 
@@ -41,7 +41,7 @@ export class Result {
    */
   public async comment(): Promise<void> {
     const messages: string[] = [
-      this.issueCountMessage({emojis: true})
+      this.issueCountMessage({ emojis: true })
     ];
 
     const analyzeBody = this.analyze.commentBody;
@@ -53,7 +53,7 @@ export class Result {
       messages.push(formatBody);
     }
 
-    await comment({message: messages.join('\n---\n')});
+    await comment({ message: messages.join('\n---\n') });
   }
 
   /**
@@ -62,7 +62,7 @@ export class Result {
    * @param params 
    * @returns 
    */
-  private issueCountMessage(params?: {emojis?: boolean}): string {
+  private issueCountMessage(params?: { emojis?: boolean }): string {
     const messages: string[] = [
       this.title(params),
       this.titleLineAnalyze({
@@ -90,7 +90,7 @@ export class Result {
    * @param params 
    * @returns 
    */
-  private title(params?: {emojis?: boolean}): string {
+  private title(params?: { emojis?: boolean }): string {
     const title = `Dart Analyzer found ${this.count} issue${Result.pluralS(this.count)}`;
     if (params?.emojis && actionOptions.emojis) {
       let emoji = ':tada:';
@@ -111,7 +111,7 @@ export class Result {
    * @param params 
    * @returns 
    */
-  private titleLineAnalyze(params: {emojis?: boolean, type: DartAnalyzeLogTypeEnum}): string {
+  private titleLineAnalyze(params: { emojis?: boolean, type: DartAnalyzeLogTypeEnum }): string {
     const isFail = DartAnalyzeLogType.isFail(params.type);
     let emoji = '';
     let count: number;
@@ -146,10 +146,10 @@ export class Result {
    * @param params 
    * @returns 
    */
-  private titleLineFormat(params: {emojis?: boolean}):string {
+  private titleLineFormat(params: { emojis?: boolean }): string {
     let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
     const highlight = params.emojis && this.format.count && actionOptions.failOn === FailOnEnum.Format ? '**' : '';
-    return `- ${params.emojis && actionOptions.emojis ? emoji : '' }${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
+    return `- ${params.emojis && actionOptions.emojis ? emoji : ''}${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
   }
 
   /**
@@ -158,7 +158,7 @@ export class Result {
   public log(): void {
     const logger = this.success ? (this.count ? core.warning : core.info) : core.setFailed;
     logger(this.issueCountMessage());
-    
+
   }
 
   /**
@@ -167,7 +167,7 @@ export class Result {
    * @returns 's' if count > 1, else '' 
    */
   private static pluralS(count: number): string {
-    return count > 1 ? 's': '';
+    return count > 1 ? 's' : '';
   }
 
   /**
