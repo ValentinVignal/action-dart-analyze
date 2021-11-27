@@ -5,7 +5,7 @@ import { FailOn, FailOnEnum } from "./FailOn";
 /**
  * Contains all the options of the action
  */
-class ActionOptions {
+export class ActionOptions {
   public readonly failOn: FailOnEnum;
   public readonly workingDirectory: string;
   public readonly token: string;
