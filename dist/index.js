@@ -13208,8 +13208,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.comment = void 0;
-const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(3030);
 function comment(params) {
     var _a;
@@ -13311,10 +13311,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IgnoredFiles = void 0;
-const yaml = __importStar(__nccwpck_require__(1917));
 const fs = __importStar(__nccwpck_require__(5747));
-// import { minimatch } from 'minimatch';
+const yaml = __importStar(__nccwpck_require__(1917));
 const minimatch = __importStar(__nccwpck_require__(3973));
+const path = __importStar(__nccwpck_require__(5622));
+const ActionOptions_1 = __nccwpck_require__(3615);
 /**
  * The ignore files in the analysis_options.yaml
  */
@@ -13323,11 +13324,11 @@ class IgnoredFiles {
         var _a, _b;
         let patterns;
         try {
-            const yamlFile = yaml.load(fs.readFileSync('./analysis_options.yaml', 'utf8'));
+            const yamlFile = yaml.load(fs.readFileSync(path.resolve(ActionOptions_1.actionOptions.workingDirectory, 'analysis_options.yaml'), 'utf8'));
             patterns = (_b = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude) !== null && _b !== void 0 ? _b : [];
         }
         catch (error) {
-            console.log(`Could not load analysis_options.yml:\n${error}`);
+            console.log(`Could not load analysis_options.yaml:\n${error}`);
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
         this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
