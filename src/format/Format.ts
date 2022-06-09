@@ -42,6 +42,11 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
 
   const fileNotFormatted = new Set<string>();
 
+  console.log('formatted files:');
+  for (const file of params.modifiedFiles.files.keys()) {
+    console.log('   ', file);
+  }
+
   for (const line of [...lines, ...errLines]) {
     if (!line.startsWith('Changed')) {
       continue;
