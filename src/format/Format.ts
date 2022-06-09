@@ -48,6 +48,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   }
 
   for (const line of [...lines, ...errLines]) {
+    console.log('line', line);
     if (!line.startsWith('Changed')) {
       continue;
     }

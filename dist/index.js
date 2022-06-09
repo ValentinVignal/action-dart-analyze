@@ -12794,7 +12794,12 @@ function format(params) {
         const lines = output.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
+        console.log('formatted files:');
+        for (const file of params.modifiedFiles.files.keys()) {
+            console.log('   ', file);
+        }
         for (const line of [...lines, ...errLines]) {
+            console.log('line', line);
             if (!line.startsWith('Changed')) {
                 continue;
             }
@@ -13142,7 +13147,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.actionOptions = void 0;
+exports.actionOptions = exports.ActionOptions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
 const FailOn_1 = __nccwpck_require__(1613);
@@ -13165,6 +13170,7 @@ class ActionOptions {
         }
     }
 }
+exports.ActionOptions = ActionOptions;
 /**
  * Singleton with the option of the action
  */
@@ -13328,7 +13334,7 @@ class IgnoredFiles {
             patterns = (_b = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude) !== null && _b !== void 0 ? _b : [];
         }
         catch (error) {
-            console.log(`Could not load analysis_options.yaml:\n${error}`);
+            console.log('Could not load analysis_options.yaml:\n', error);
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
         this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
