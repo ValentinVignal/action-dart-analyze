@@ -1,4 +1,5 @@
 import * as exec from '@actions/exec';
+import * as path from 'path';
 import { actionOptions } from '../utils/ActionOptions';
 import { IgnoredFiles } from '../utils/IgnoredFiles';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
@@ -43,11 +44,14 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   const fileNotFormatted = new Set<string>();
 
   console.log('cwd', process.cwd());
+  const currentWorkingDirectory = process.cwd();
 
-  console.log('formatted files:');
+  console.log('modified files:');
   for (const file of params.modifiedFiles.files.keys()) {
     console.log('   ', file);
   }
+
+
 
   for (const line of [...lines, ...errLines]) {
     console.log('line', line);
@@ -59,7 +63,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
     if (params.ignoredFiles.has(file)) {
       continue;
     }
-    if (params.modifiedFiles.has(file)) {
+    if (params.modifiedFiles.has(path.join(currentWorkingDirectory, file))) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }

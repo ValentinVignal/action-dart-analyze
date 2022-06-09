@@ -12761,6 +12761,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.format = void 0;
 const exec = __importStar(__nccwpck_require__(1514));
+const path = __importStar(__nccwpck_require__(5622));
 const ActionOptions_1 = __nccwpck_require__(3615);
 const FormatResult_1 = __nccwpck_require__(6290);
 function format(params) {
@@ -12795,7 +12796,8 @@ function format(params) {
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
         console.log('cwd', process.cwd());
-        console.log('formatted files:');
+        const currentWorkingDirectory = process.cwd();
+        console.log('modified files:');
         for (const file of params.modifiedFiles.files.keys()) {
             console.log('   ', file);
         }
@@ -12808,7 +12810,7 @@ function format(params) {
             if (params.ignoredFiles.has(file)) {
                 continue;
             }
-            if (params.modifiedFiles.has(file)) {
+            if (params.modifiedFiles.has(path.join(currentWorkingDirectory, file))) {
                 fileNotFormatted.add(file);
                 console.log(`::warning file=${file}:: ${file} is not formatted`);
             }
