@@ -12794,6 +12794,7 @@ function format(params) {
         const lines = output.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
+        console.log('cwd', process.cwd());
         console.log('formatted files:');
         for (const file of params.modifiedFiles.files.keys()) {
             console.log('   ', file);

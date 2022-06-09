@@ -42,6 +42,8 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
 
   const fileNotFormatted = new Set<string>();
 
+  console.log('cwd', process.cwd());
+
   console.log('formatted files:');
   for (const file of params.modifiedFiles.files.keys()) {
     console.log('   ', file);
