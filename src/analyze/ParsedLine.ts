@@ -1,7 +1,7 @@
-import path from "path";
-import { actionOptions } from "../utils/ActionOptions";
-import { FailOnEnum } from "../utils/FailOn";
-import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum, DartAnalyzeLogTypeKey } from "./DartAnalyzeLogType";
+import path from 'path';
+import { actionOptions } from '../utils/ActionOptions';
+import { FailOnEnum } from '../utils/FailOn';
+import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum, DartAnalyzeLogTypeKey } from './DartAnalyzeLogType';
 
 export interface ParsedLineInterface {
   file: string;
@@ -19,7 +19,7 @@ export class ParsedLine {
   readonly column: number;
   readonly message: string;
   readonly urls: [string, string];
-  readonly type: DartAnalyzeLogTypeEnum
+  readonly type: DartAnalyzeLogTypeEnum;
   readonly originalLine: string;
   readonly lintName: string;
 
@@ -64,9 +64,9 @@ export class ParsedLine {
       case DartAnalyzeLogTypeEnum.Error:
         return ':bangbang:';
       case DartAnalyzeLogTypeEnum.Warning:
-        return ':warning:'
+        return ':warning:';
       case DartAnalyzeLogTypeEnum.Info:
-        return ':eyes:'
+        return ':eyes:';
     }
   }
 

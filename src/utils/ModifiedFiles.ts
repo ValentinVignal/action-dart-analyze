@@ -166,7 +166,7 @@ export class ModifiedFiles {
 
   constructor() {
     this.files = new Map<ModifiedFile['name'], ModifiedFile>();
-    let resolveInit: ((value: boolean) => void)[] = [];
+    const resolveInit: ((value: boolean) => void)[] = [];
     this.isInit = new Promise<boolean>((resolve) => {
       resolveInit.push(resolve);
     });
@@ -201,15 +201,15 @@ export class ModifiedFiles {
       case 'pull_request':
         base = github.context.payload.pull_request?.base?.sha;
         head = github.context.payload.pull_request?.head?.sha;
-        break
+        break;
       case 'push':
         base = github.context.payload.before;
         head = github.context.payload.after;
-        break
+        break;
       default:
         core.setFailed(
           `This action only supports pull requests and pushes, ${github.context.eventName} events are not supported. ` +
-          "Please submit an issue on this action's GitHub repo if you believe this in correct."
+          'Please submit an issue on this action\'s GitHub repo if you believe this in correct.'
         );
     }
 
@@ -227,10 +227,10 @@ export class ModifiedFiles {
     if (response.status !== 200) {
       core.setFailed(
         `The GitHub API for comparing the base and head commits for this ${context.eventName} event returned ${response.status}, expected 200. ` +
-        "Please submit an issue on this action's GitHub repo."
-      )
+        'Please submit an issue on this action\'s GitHub repo.'
+      );
     }
-    return response.data.files;
+    return response.data.files!;
   }
 
   /**

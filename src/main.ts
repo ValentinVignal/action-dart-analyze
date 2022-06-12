@@ -35,6 +35,7 @@ async function main(): Promise<void> {
       await result.comment();
     }
     result.log();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     core.setFailed(`error: ${error.message}`);
   }

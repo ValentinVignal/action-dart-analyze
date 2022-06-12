@@ -1,0 +1,21 @@
+name: Linter
+
+on: [pull_request]
+
+jobs:
+  tests:
+    name: Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm i
+      - name: eslint
+        # This is the name of the author of the github action.
+        # cspell:ignore reviewdog
+        uses: reviewdog/action-eslint@v1
+        with:
+          reporter: github-pr-review

@@ -1,4 +1,5 @@
 import * as exec from '@actions/exec';
+import * as path from 'path';
 import { actionOptions } from '../utils/ActionOptions';
 import { IgnoredFiles } from '../utils/IgnoredFiles';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
@@ -33,14 +34,13 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   try {
     await exec.exec('dart format', args, options);
   } catch (_) {
-
+    // Do nothing.
   }
-
 
   const lines = output.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
-
   const fileNotFormatted = new Set<string>();
+  const currentWorkingDirectory = process.cwd();
 
   for (const line of [...lines, ...errLines]) {
     if (!line.startsWith('Changed')) {
@@ -48,10 +48,12 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
     }
 
     const file = line.split(' ')[1];
+    // There is not need to use the `currentWorkingDirectory` here because the
+    // `ignoredFiles` a minimatch from the working directory.
     if (params.ignoredFiles.has(file)) {
       continue;
     }
-    if (params.modifiedFiles.has(file)) {
+    if (params.modifiedFiles.has(path.join(currentWorkingDirectory, actionOptions.workingDirectory, file))) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }

@@ -1,10 +1,27 @@
-on: [pull_request]
+name: Tests
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - run: npm ci
-      - name: Test
-        run: npm test
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - run: npm install
+      - run: npm test
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # This is the name of the coverage reporter.
+          # cspell:ignore cobertura
+          files: ./coverage/clover.xml

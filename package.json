@@ -23,10 +23,13 @@
   },
   "homepage": "https://github.com/ValentinVignal/action-dart-analyze#readme",
   "devDependencies": {
-    "@types/jest": "^26.0.22",
+    "@types/jest": "^28.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
     "@vercel/ncc": "^0.27.0",
-    "jest": "^27.3.1",
-    "ts-jest": "^27.0.7",
+    "eslint": "^8.17.0",
+    "jest": "^28.1.1",
+    "ts-jest": "^28.0.4",
     "typescript": "^4.2.3"
   },
   "dependencies": {

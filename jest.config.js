@@ -1,9 +1,13 @@
+// eslint-disable-next-line no-undef
 module.exports = {
-	clearMocks: true,
-	moduleFileExtensions: ['js', 'ts'],
-	testMatch: ['**/*.test.ts'],
-	transform: {
-		'^.+\\.ts$': 'ts-jest'
-	},
-	verbose: true
-}
+  clearMocks: true,
+  restoreMocks: true,
+  moduleFileExtensions: ['js', 'ts'],
+  testMatch: ['**/*.test.ts'],
+  transform: {
+    '^.+\\.ts$': 'ts-jest'
+  },
+  verbose: true,
+  coverageDirectory: 'coverage',
+  collectCoverage: true,
+};

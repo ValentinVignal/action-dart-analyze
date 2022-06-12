@@ -16,7 +16,7 @@ export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise
   let errOutputs = '';
 
 
-  console.log('::group:: Analyze dart code')
+  console.log('::group:: Analyze dart code');
 
   const options: exec.ExecOptions = { cwd: actionOptions.workingDirectory };
 
@@ -57,7 +57,7 @@ export async function analyze(params: { modifiedFiles: ModifiedFiles }): Promise
       });
       if (!params.modifiedFiles.has(parsedLine.file)) {
         // Don't lint anything if the file is not part of the changes
-        continue
+        continue;
       }
       const modifiedFile = params.modifiedFiles.get(parsedLine.file)!;
       if (!modifiedFile.hasAdditionLine(parsedLine.line)) {
