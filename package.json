@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/jest": "^28.1.1",
     "@vercel/ncc": "^0.27.0",
+    "eslint": "^8.17.0",
     "jest": "^28.1.1",
     "ts-jest": "^28.0.4",
     "typescript": "^4.2.3"
