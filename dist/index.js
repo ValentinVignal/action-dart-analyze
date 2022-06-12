@@ -12795,22 +12795,18 @@ function format(params) {
         const lines = output.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
-        console.log('cwd', process.cwd());
         const currentWorkingDirectory = process.cwd();
-        console.log('modified files:');
-        for (const file of params.modifiedFiles.files.keys()) {
-            console.log('   ', file);
-        }
         for (const line of [...lines, ...errLines]) {
-            console.log('line', line);
             if (!line.startsWith('Changed')) {
                 continue;
             }
             const file = line.split(' ')[1];
+            // There is not need to use the `currentWorkingDirectory` here because the
+            // `ignoredFiles` a minimatch from the working directory.
             if (params.ignoredFiles.has(file)) {
                 continue;
             }
-            if (params.modifiedFiles.has(path.join(currentWorkingDirectory, file))) {
+            if (params.modifiedFiles.has(path.join(currentWorkingDirectory, ActionOptions_1.actionOptions.workingDirectory, file))) {
                 fileNotFormatted.add(file);
                 console.log(`::warning file=${file}:: ${file} is not formatted`);
             }
