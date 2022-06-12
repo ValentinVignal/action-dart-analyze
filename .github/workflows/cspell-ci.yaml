@@ -1,0 +1,12 @@
+name: CSpell
+
+on: [pull_request]
+
+jobs:
+  tests:
+    name: Code spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check spelling
+        uses: streetsidesoftware/cspell-action@v1

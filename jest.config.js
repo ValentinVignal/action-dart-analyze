@@ -6,5 +6,7 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest'
   },
-  verbose: true
+  verbose: true,
+  coverageDirectory: 'coverage',
+  collectCoverage: true,
 }

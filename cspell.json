@@ -1,5 +1,6 @@
 {
   "words": [
-    "endgroup" // This is the command to use close a group in the console of the GitHub action.
+    "codecov",
+    "endgroup"
   ]
 }
