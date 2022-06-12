@@ -38,7 +38,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-non-null-assertion': 0,
   },
-  ignoredPatterns: [
+  ignorePatterns: [
     'dist/**',
   ]
 };
