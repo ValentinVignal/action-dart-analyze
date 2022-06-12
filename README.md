@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/ValentinVignal/action-dart-analyze/branch/main/graph/badge.svg?token=XESGUDU3E6)](https://codecov.io/gh/ValentinVignal/action-dart-analyze)
+
 # action-dart-analyze
 
 This action analyzes dart code by running `dart analyze` and `dart format`.
