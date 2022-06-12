@@ -1,21 +1,21 @@
 const mockPath = {
   join: jest.fn(),
-}
+};
 
 jest.mock('path', () => mockPath);
 
 const mockActionOptions = {
   actionOptions: {} as ActionOptions,
-}
+};
 
 jest.mock('../utils/ActionOptions', () => {
   return mockActionOptions;
 });
 
-import * as exec from "@actions/exec";
-import { ActionOptions } from "../utils/ActionOptions";
-import { FailOnEnum } from "../utils/FailOn";
-import { IgnoredFiles } from "../utils/IgnoredFiles";
+import * as exec from '@actions/exec';
+import { ActionOptions } from '../utils/ActionOptions';
+import { FailOnEnum } from '../utils/FailOn';
+import { IgnoredFiles } from '../utils/IgnoredFiles';
 import { ModifiedFiles } from '../utils/ModifiedFiles';
 import { format } from './Format';
 
@@ -36,10 +36,10 @@ describe('Format', () => {
     } as ActionOptions;
     const ignoredFiles: Partial<IgnoredFiles> = {
       has: jest.fn(),
-    }
+    };
     const modifiedFiles: Partial<ModifiedFiles> = {
       has: jest.fn(),
-    }
+    };
     jest.spyOn(console, 'log').mockImplementation();
 
 
@@ -64,6 +64,7 @@ describe('Format', () => {
     });
 
     expect(result.success).toEqual(false); // It should fail because some modified files are not formatted.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((result as any).files).toEqual(new Set([
       'lib/file_0.dart',
       'lib/file_1.dart',
@@ -81,5 +82,5 @@ describe('Format', () => {
     expect(ignoredFiles.has).toHaveBeenCalledWith('lib/file_1.dart');
     expect(ignoredFiles.has).toHaveBeenCalledWith('lib/file_2.dart');
 
-  })
+  });
 });

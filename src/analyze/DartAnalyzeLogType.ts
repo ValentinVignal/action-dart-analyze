@@ -1,5 +1,5 @@
-import { actionOptions } from "../utils/ActionOptions";
-import { FailOnEnum } from "../utils/FailOn";
+import { actionOptions } from '../utils/ActionOptions';
+import { FailOnEnum } from '../utils/FailOn';
 
 export enum DartAnalyzeLogTypeEnum {
   Info = 1,

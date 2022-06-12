@@ -1,9 +1,9 @@
 import * as core from '@actions/core';
-import { AnalyzeResult } from "../analyze/AnalyzeResult";
+import { AnalyzeResult } from '../analyze/AnalyzeResult';
 import { DartAnalyzeLogType, DartAnalyzeLogTypeEnum } from '../analyze/DartAnalyzeLogType';
 import { FormatResult } from '../format/FormatResult';
 import { actionOptions } from '../utils/ActionOptions';
-import { comment } from "../utils/Comment";
+import { comment } from '../utils/Comment';
 import { FailOnEnum } from '../utils/FailOn';
 
 export interface ResultInterface {
@@ -120,17 +120,17 @@ export class Result {
       case DartAnalyzeLogTypeEnum.Error:
         count = this.analyze.counts.errors;
         emoji = count ? 'x' : 'white_check_mark';
-        line = `${count} error${Result.pluralS(count)}`
+        line = `${count} error${Result.pluralS(count)}`;
         break;
       case DartAnalyzeLogTypeEnum.Warning:
         count = this.analyze.counts.warnings;
-        emoji = count ? 'warning' : 'tada'
-        line = `${count} warning${Result.pluralS(count)}`
+        emoji = count ? 'warning' : 'tada';
+        line = `${count} warning${Result.pluralS(count)}`;
         break;
       case DartAnalyzeLogTypeEnum.Info:
         count = this.analyze.counts.info;
         emoji = count ? 'eyes' : 'rocket';
-        line = `${count} info log${Result.pluralS(count)}`
+        line = `${count} info log${Result.pluralS(count)}`;
         break;
     }
 
@@ -147,7 +147,7 @@ export class Result {
    * @returns 
    */
   private titleLineFormat(params: { emojis?: boolean }): string {
-    let emoji = `:${this.format.count ? 'poop' : 'art'}: `;
+    const emoji = `:${this.format.count ? 'poop' : 'art'}: `;
     const highlight = params.emojis && this.format.count && actionOptions.failOn === FailOnEnum.Format ? '**' : '';
     return `- ${params.emojis && actionOptions.emojis ? emoji : ''}${highlight}${this.format.count} formatting issue${Result.pluralS(this.format.count)}${highlight}`;
   }

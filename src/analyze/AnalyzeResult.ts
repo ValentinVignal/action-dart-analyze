@@ -1,6 +1,6 @@
-import { actionOptions } from "../utils/ActionOptions";
-import { FailOnEnum } from "../utils/FailOn";
-import { ParsedLine } from "./ParsedLine";
+import { actionOptions } from '../utils/ActionOptions';
+import { FailOnEnum } from '../utils/FailOn';
+import { ParsedLine } from './ParsedLine';
 
 export interface AnalyzeResultCountsInterface {
   info: number;
@@ -63,7 +63,7 @@ export class AnalyzeResult {
 
   // Whether it is a success (not failing results)
   public get success(): boolean {
-    return !this.counts.failCount
+    return !this.counts.failCount;
   }
 
   // Whether it has logs (even not failing ones)
@@ -78,10 +78,10 @@ export class AnalyzeResult {
     const comments: string[] = [];
 
     for (const line of this.lines) {
-      let urls = `See [link](${line.urls[0]}) or [link](${line.urls[1]}).`;
+      const urls = `See [link](${line.urls[0]}) or [link](${line.urls[1]}).`;
       let failEmoji = '';
       if (![FailOnEnum.Nothing, FailOnEnum.Format, FailOnEnum.Info].includes(actionOptions.failOn)) {
-        failEmoji = `:${line.isFail ? 'x' : 'poop'}: `
+        failEmoji = `:${line.isFail ? 'x' : 'poop'}: `;
       }
       const highlight = line.isFail ? '**' : '';
       comments.push(`- ${actionOptions.emojis ? failEmoji + line.emoji + ' ' : ''}${highlight}${line.humanReadableString}${highlight} ${urls}`);

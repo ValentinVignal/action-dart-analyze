@@ -34,7 +34,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   try {
     await exec.exec('dart format', args, options);
   } catch (_) {
-
+    // Do nothing.
   }
 
   const lines = output.trim().split(/\r?\n/);

@@ -1,4 +1,5 @@
-module.exports = {
+// eslint-disable-next-line no-undef
+exports.default = {
   clearMocks: true,
   restoreMocks: true,
   moduleFileExtensions: ['js', 'ts'],
@@ -9,4 +10,4 @@ module.exports = {
   verbose: true,
   coverageDirectory: 'coverage',
   collectCoverage: true,
-}
+};

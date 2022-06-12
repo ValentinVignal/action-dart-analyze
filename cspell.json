@@ -2,7 +2,8 @@
   "ignorePaths": [
     "dist/**", // Those are compiled files.
     "package.json",
-    "package-lock.json"
+    "package-lock.json",
+    ".eslintrc.js"
   ],
   "words": [
     "codecov",
