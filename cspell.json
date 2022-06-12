@@ -1,4 +1,9 @@
 {
+  "ignorePaths": [
+    "dist/**", // Those are compiled files.
+    "package.json",
+    "package-lock.json"
+  ],
   "words": [
     "codecov",
     "endgroup"
