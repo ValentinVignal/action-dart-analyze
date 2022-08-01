@@ -1,9 +1,3 @@
-const mockPath = {
-  join: jest.fn(),
-};
-
-jest.mock('path', () => mockPath);
-
 const mockActionOptions = {
   actionOptions: {} as ActionOptions,
 };
@@ -31,7 +25,7 @@ describe('Format', () => {
   it('should concatenate the cwd to files from the format command to compare them with the modified files', async () => {
     mockActionOptions.actionOptions = {
       format: true,
-      workingDirectory: 'actionOptionWorkingDirectory',
+      workingDirectory: 'cwd/actionOptionWorkingDirectory',
       failOn: FailOnEnum.Format,
     } as ActionOptions;
     const ignoredFiles: Partial<IgnoredFiles> = {
@@ -55,8 +49,6 @@ describe('Format', () => {
       return ['cwd/actionOptionWorkingDirectory/lib/file_0.dart', 'cwd/actionOptionWorkingDirectory/lib/file_1.dart'].includes(file);
     });
 
-    jest.spyOn(process, 'cwd').mockReturnValue('cwd');
-    mockPath.join.mockImplementation((...args: string[]) => args.join('/'));
 
     const result = await format({
       modifiedFiles: modifiedFiles as ModifiedFiles,

@@ -16551,7 +16551,6 @@ function format(params) {
         const lines = output.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
-        const currentWorkingDirectory = process.cwd();
         for (const line of [...lines, ...errLines]) {
             if (!line.startsWith('Changed')) {
                 continue;
@@ -16562,7 +16561,7 @@ function format(params) {
             if (params.ignoredFiles.has(file)) {
                 continue;
             }
-            if (params.modifiedFiles.has(path.join(currentWorkingDirectory, ActionOptions_1.actionOptions.workingDirectory, file))) {
+            if (params.modifiedFiles.has(path.join(ActionOptions_1.actionOptions.workingDirectory, file))) {
                 fileNotFormatted.add(file);
                 console.log(`::warning file=${file}:: ${file} is not formatted`);
             }
@@ -17175,7 +17174,7 @@ const utils_1 = __nccwpck_require__(3030);
 const path_1 = __importDefault(__nccwpck_require__(5622));
 const ActionOptions_1 = __nccwpck_require__(3615);
 /**
- * Modified lines chunk of a file
+ * Modified lines chunk of a file.
  */
 class FileLines {
     constructor(params) {
@@ -17315,6 +17314,8 @@ class ModifiedFiles {
             const files = yield this.getGithubFiles();
             for (const file of files) {
                 this.files.set(path_1.default.join(process.env.GITHUB_WORKSPACE, file.filename), new ModifiedFile(file));
+                const modifiedFile = new ModifiedFile(file);
+                this.files.set(modifiedFile.name, modifiedFile);
             }
             this._resolveInit(true);
         });
@@ -17360,10 +17361,12 @@ class ModifiedFiles {
         });
     }
     /**
-     * Check whether a file is modified
+     * Check whether a file is modified.
+     *
+     * This needs to be the absolute path of the file (`'/home/runner/work/...'`).
      *
      * @param fileName
-     * @returns true if fileName is a modified file
+     * @returns `true` if {@link fileName} is a modified file.
      */
     has(fileName) {
         return this.files.has(fileName);

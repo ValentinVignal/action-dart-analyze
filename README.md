@@ -74,12 +74,12 @@ jobs:
     name: Lint flutter code
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up Flutter
-      uses: subosito/flutter-action@v1
+      uses: subosito/flutter-action@v2
     - run: flutter pub get
     - name: Analyze Flutter
-      uses: ValentinVignal/action-dart-analyze@v0.13
+      uses: ValentinVignal/action-dart-analyze@v0.14
       with:
         fail-on: 'warning'
 ```

@@ -40,7 +40,6 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   const lines = output.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
   const fileNotFormatted = new Set<string>();
-  const currentWorkingDirectory = process.cwd();
 
   for (const line of [...lines, ...errLines]) {
     if (!line.startsWith('Changed')) {
@@ -53,7 +52,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
     if (params.ignoredFiles.has(file)) {
       continue;
     }
-    if (params.modifiedFiles.has(path.join(currentWorkingDirectory, actionOptions.workingDirectory, file))) {
+    if (params.modifiedFiles.has(path.join(actionOptions.workingDirectory, file))) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }
