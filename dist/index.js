@@ -16567,7 +16567,7 @@ function format(params) {
             if (params.ignoredFiles.has(file)) {
                 continue;
             }
-            if (params.modifiedFiles.has(path.join(currentWorkingDirectory, ActionOptions_1.actionOptions.workingDirectory, file))) {
+            if (params.modifiedFiles.has(file)) {
                 fileNotFormatted.add(file);
                 console.log(`::warning file=${file}:: ${file} is not formatted`);
             }
@@ -17169,15 +17169,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ModifiedFiles = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(3030);
-const path_1 = __importDefault(__nccwpck_require__(5622));
 const ActionOptions_1 = __nccwpck_require__(3615);
 /**
  * Modified lines chunk of a file
@@ -17319,7 +17315,8 @@ class ModifiedFiles {
         return __awaiter(this, void 0, void 0, function* () {
             const files = yield this.getGithubFiles();
             for (const file of files) {
-                this.files.set(path_1.default.join(process.env.GITHUB_WORKSPACE, file.filename), new ModifiedFile(file));
+                const modifiedFile = new ModifiedFile(file);
+                this.files.set(modifiedFile.name, modifiedFile);
             }
             this._resolveInit(true);
         });

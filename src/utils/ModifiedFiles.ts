@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
-import path from 'path';
 import { EventName } from '../actions/github/EventName';
 import { actionOptions } from './ActionOptions';
 
@@ -181,7 +180,8 @@ export class ModifiedFiles {
   private async init(): Promise<void> {
     const files = await this.getGithubFiles();
     for (const file of files) {
-      this.files.set(path.join(process.env.GITHUB_WORKSPACE!, file.filename), new ModifiedFile(file));
+      const modifiedFile = new ModifiedFile(file);
+      this.files.set(modifiedFile.name, modifiedFile);
     }
     this._resolveInit(true);
   }
@@ -240,7 +240,7 @@ export class ModifiedFiles {
    * @returns true if fileName is a modified file
    */
   public has(fileName: string): boolean {
-    return [...this.files.values()].map((file) => file.name).includes(fileName);
+    return this.files.has(fileName);
   }
 
   /**
