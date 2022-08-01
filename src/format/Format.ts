@@ -59,7 +59,7 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
     if (params.ignoredFiles.has(file)) {
       continue;
     }
-    if (params.modifiedFiles.has(path.join(currentWorkingDirectory, actionOptions.workingDirectory, file))) {
+    if (params.modifiedFiles.has(file)) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }

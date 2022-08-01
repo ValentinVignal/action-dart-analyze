@@ -240,7 +240,7 @@ export class ModifiedFiles {
    * @returns true if fileName is a modified file
    */
   public has(fileName: string): boolean {
-    return this.files.has(fileName);
+    return [...this.files.values()].map((file) => file.name).includes(fileName);
   }
 
   /**
