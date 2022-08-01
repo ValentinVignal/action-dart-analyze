@@ -16551,16 +16551,11 @@ function format(params) {
         const lines = output.trim().split(/\r?\n/);
         const errLines = errOutputs.trim().split(/\r?\n/);
         const fileNotFormatted = new Set();
-        for (const m of params.modifiedFiles.files) {
-            console.log('modifiedFile:', m[0], '- name:', m[1].name);
-        }
         for (const line of [...lines, ...errLines]) {
             if (!line.startsWith('Changed')) {
                 continue;
             }
             const file = line.split(' ')[1];
-            console.log('file:', file);
-            console.log('file with join:', path.join(ActionOptions_1.actionOptions.workingDirectory, file));
             // There is not need to use the `currentWorkingDirectory` here because the
             // `ignoredFiles` a minimatch from the working directory.
             if (params.ignoredFiles.has(file)) {
