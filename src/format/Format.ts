@@ -40,7 +40,6 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
   const lines = output.trim().split(/\r?\n/);
   const errLines = errOutputs.trim().split(/\r?\n/);
   const fileNotFormatted = new Set<string>();
-  const currentWorkingDirectory = process.cwd();
 
   for (const m of params.modifiedFiles.files) {
     console.log('modifiedFile:', m[0], '- name:', m[1].name);
@@ -53,13 +52,13 @@ export async function format(params: { modifiedFiles: ModifiedFiles, ignoredFile
 
     const file = line.split(' ')[1];
     console.log('file:', file);
-    console.log('file with join:', path.join(currentWorkingDirectory, actionOptions.workingDirectory, file));
+    console.log('file with join:', path.join(actionOptions.workingDirectory, file));
     // There is not need to use the `currentWorkingDirectory` here because the
     // `ignoredFiles` a minimatch from the working directory.
     if (params.ignoredFiles.has(file)) {
       continue;
     }
-    if (params.modifiedFiles.has(file)) {
+    if (params.modifiedFiles.has(path.join(actionOptions.workingDirectory, file))) {
       fileNotFormatted.add(file);
       console.log(`::warning file=${file}:: ${file} is not formatted`);
     }

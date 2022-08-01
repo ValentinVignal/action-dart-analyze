@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
+import path from 'path';
 import { EventName } from '../actions/github/EventName';
 import { actionOptions } from './ActionOptions';
 
@@ -10,7 +11,7 @@ interface FileLinesInterface {
 }
 
 /**
- * Modified lines chunk of a file
+ * Modified lines chunk of a file.
  */
 class FileLines {
   readonly start: number;
@@ -36,6 +37,9 @@ export interface ModifiedFileInterface {
  * A modified file
  */
 class ModifiedFile {
+  /**
+   * The file name from the root directory (`'lib/src/...'`).
+   */
   readonly name: string;
   readonly deletions: FileLines[];
   readonly additions: FileLines[];
@@ -180,6 +184,7 @@ export class ModifiedFiles {
   private async init(): Promise<void> {
     const files = await this.getGithubFiles();
     for (const file of files) {
+      this.files.set(path.join(process.env.GITHUB_WORKSPACE!, file.filename), new ModifiedFile(file));
       const modifiedFile = new ModifiedFile(file);
       this.files.set(modifiedFile.name, modifiedFile);
     }
@@ -234,10 +239,12 @@ export class ModifiedFiles {
   }
 
   /**
-   * Check whether a file is modified
-   * 
+   * Check whether a file is modified.
+   *
+   * This needs to be the absolute path of the file (`'/home/runner/work/...'`).
+   *
    * @param fileName 
-   * @returns true if fileName is a modified file
+   * @returns `true` if {@link fileName} is a modified file.
    */
   public has(fileName: string): boolean {
     return this.files.has(fileName);
