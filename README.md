@@ -79,7 +79,7 @@ jobs:
       uses: subosito/flutter-action@v2
     - run: flutter pub get
     - name: Analyze Flutter
-      uses: ValentinVignal/action-dart-analyze@v0.14
+      uses: ValentinVignal/action-dart-analyze@v0.15
       with:
         fail-on: 'warning'
 ```
