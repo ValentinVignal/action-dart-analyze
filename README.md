@@ -1,5 +1,7 @@
 [![codecov](https://codecov.io/gh/ValentinVignal/action-dart-analyze/branch/main/graph/badge.svg?token=XESGUDU3E6)](https://codecov.io/gh/ValentinVignal/action-dart-analyze)
 
+[![wakatime](https://wakatime.com/badge/user/a700230c-ba51-4378-8fbc-fbcb542401ed/project/972bdd36-bc57-4475-83c6-a0ebf130b3a0.svg)](https://wakatime.com/badge/user/a700230c-ba51-4378-8fbc-fbcb542401ed/project/972bdd36-bc57-4475-83c6-a0ebf130b3a0)
+
 # action-dart-analyze
 
 This action analyzes dart code by running `dart analyze` and `dart format`.
