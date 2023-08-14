@@ -17117,8 +17117,6 @@ class IgnoredFiles {
             console.error('Could not load analysis_options.yaml:\n', error);
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
-        console.log('patterns');
-        console.log(patterns);
         this.patterns = patterns.map((pattern) => new minimatch_1.default.Minimatch(pattern));
     }
     /**
