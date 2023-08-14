@@ -17090,11 +17090,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IgnoredFiles = void 0;
 const fs = __importStar(__nccwpck_require__(5747));
 const yaml = __importStar(__nccwpck_require__(1917));
-const minimatch = __importStar(__nccwpck_require__(3973));
+const minimatch_1 = __importDefault(__nccwpck_require__(3973));
 const path = __importStar(__nccwpck_require__(5622));
 const ActionOptions_1 = __nccwpck_require__(3615);
 /**
@@ -17102,17 +17105,63 @@ const ActionOptions_1 = __nccwpck_require__(3615);
  */
 class IgnoredFiles {
     constructor() {
-        var _a, _b;
         let patterns;
         try {
-            const yamlFile = yaml.load(fs.readFileSync(path.resolve(ActionOptions_1.actionOptions.workingDirectory, 'analysis_options.yaml'), 'utf8'));
-            patterns = (_b = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude) !== null && _b !== void 0 ? _b : [];
+            const yamlPath = IgnoredFiles.findClosestYamlFile(ActionOptions_1.actionOptions.workingDirectory);
+            if (!yamlPath) {
+                throw new Error(`Could not find any "analysis_options.yaml" in the parent directories of "${ActionOptions_1.actionOptions.workingDirectory}"`);
+            }
+            patterns = IgnoredFiles.getIgnoredPatterns(yamlPath);
         }
         catch (error) {
-            console.log('Could not load analysis_options.yaml:\n', error);
+            console.error('Could not load analysis_options.yaml:\n', error);
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
-        this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
+        this.patterns = patterns.map((pattern) => new minimatch_1.default.Minimatch(pattern));
+    }
+    /**
+     *
+     * @param path
+     */
+    static findClosestYamlFile(directoryPath) {
+        const yamlPath = path.resolve(directoryPath, 'analysis_options.yaml');
+        if (fs.existsSync(yamlPath)) {
+            return yamlPath;
+        }
+        else {
+            const parentDirectoryPath = path.resolve(directoryPath, '..');
+            if (parentDirectoryPath === directoryPath) {
+                return null;
+            }
+            else {
+                return IgnoredFiles.findClosestYamlFile(parentDirectoryPath);
+            }
+        }
+    }
+    static getIgnoredPatterns(yamlPath) {
+        var _a;
+        const yamlFile = yaml.load(fs.readFileSync(yamlPath, 'utf8'));
+        const exclude = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude;
+        let patterns;
+        if (exclude) {
+            if (Array.isArray(exclude)) {
+                patterns = exclude;
+            }
+            else if (typeof exclude === 'string') {
+                patterns = [exclude];
+            }
+        }
+        patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
+        if (yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.include) {
+            const newPath = path.resolve(path.dirname(yamlPath), yamlFile.include);
+            if (fs.existsSync(newPath)) {
+                return [
+                    ...IgnoredFiles.getIgnoredPatterns(newPath),
+                    ...patterns,
+                ];
+            }
+        }
+        return patterns;
     }
     /**
      * Whether a file is ignored
