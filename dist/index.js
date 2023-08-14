@@ -17155,7 +17155,7 @@ class IgnoredFiles {
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
         if (yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.include) {
-            const newPath = path.resolve(yamlPath, yamlFile.include);
+            const newPath = path.resolve(path.dirname(yamlPath), yamlFile.include);
             if (fs.existsSync(newPath)) {
                 return [
                     ...IgnoredFiles.getIgnoredPatterns(newPath),

@@ -65,7 +65,7 @@ export class IgnoredFiles {
     patterns ??= [];
 
     if (yamlFile?.include) {
-      const newPath = path.resolve(yamlPath, yamlFile.include);
+      const newPath = path.resolve(path.dirname(yamlPath), yamlFile.include);
       if (fs.existsSync(newPath)) {
         return [
           ...IgnoredFiles.getIgnoredPatterns(newPath),
