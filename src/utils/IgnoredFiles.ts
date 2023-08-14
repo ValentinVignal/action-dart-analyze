@@ -28,8 +28,6 @@ export class IgnoredFiles {
       console.error('Could not load analysis_options.yaml:\n', error);
     }
     patterns ??= [];
-    console.log('patterns');
-    console.log(patterns);
     this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
   }
 
