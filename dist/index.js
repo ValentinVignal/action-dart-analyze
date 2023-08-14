@@ -17117,7 +17117,7 @@ class IgnoredFiles {
             console.error('Could not load analysis_options.yaml:\n', error);
         }
         patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
-        console.log('partterns');
+        console.log('patterns');
         console.log(patterns);
         this.patterns = patterns.map((pattern) => new minimatch_1.default.Minimatch(pattern));
     }
@@ -17141,9 +17141,9 @@ class IgnoredFiles {
         }
     }
     static getIgnoredPatterns(yamlPath) {
-        var _a;
+        var _a, _b;
         const yamlFile = yaml.load(fs.readFileSync(yamlPath, 'utf8'));
-        const ignoredFiles = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.exclude) !== null && _a !== void 0 ? _a : [];
+        const ignoredFiles = (_b = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude) !== null && _b !== void 0 ? _b : [];
         if (yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.include) {
             const newPath = path.resolve(yamlPath, yamlFile.include);
             if (fs.existsSync(newPath)) {

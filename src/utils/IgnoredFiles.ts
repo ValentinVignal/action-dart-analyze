@@ -5,8 +5,10 @@ import * as path from 'path';
 import { actionOptions } from './ActionOptions';
 
 type AnalysisOptions = {
-  exclude?: string[];
   include?: string;
+  analyzer?: {
+    exclude?: string[];
+  }
 }
 
 /**
@@ -26,7 +28,7 @@ export class IgnoredFiles {
       console.error('Could not load analysis_options.yaml:\n', error);
     }
     patterns ??= [];
-    console.log('partterns');
+    console.log('patterns');
     console.log(patterns);
     this.patterns = patterns.map((pattern) => new minimatch.Minimatch(pattern));
   }
@@ -51,7 +53,7 @@ export class IgnoredFiles {
 
   private static getIgnoredPatterns(yamlPath: string): string[] {
     const yamlFile = yaml.load(fs.readFileSync(yamlPath, 'utf8')) as AnalysisOptions;
-    const ignoredFiles = yamlFile?.exclude ?? [];
+    const ignoredFiles = yamlFile?.analyzer?.exclude ?? [];
     if (yamlFile?.include) {
       const newPath = path.resolve(yamlPath, yamlFile.include);
       if (fs.existsSync(newPath)) {
