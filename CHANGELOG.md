@@ -1,3 +1,7 @@
+## 0.16
+
+- :sparkles: Supports nested analysis options.
+
 ## 0.15
 
 - :arrow_up: Upgrade to node 16.
