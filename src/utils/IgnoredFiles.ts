@@ -7,7 +7,7 @@ import { actionOptions } from './ActionOptions';
 type AnalysisOptions = {
   include?: string;
   analyzer?: {
-    exclude?: string[];
+    exclude?: string[] | string;
   }
 }
 
@@ -53,17 +53,27 @@ export class IgnoredFiles {
 
   private static getIgnoredPatterns(yamlPath: string): string[] {
     const yamlFile = yaml.load(fs.readFileSync(yamlPath, 'utf8')) as AnalysisOptions;
-    const ignoredFiles = yamlFile?.analyzer?.exclude ?? [];
+    const exclude = yamlFile?.analyzer?.exclude;
+    let patterns: string[];
+    if (exclude) {
+      if (Array.isArray(exclude)) {
+        patterns = exclude;
+      } else if (typeof exclude === 'string') {
+        patterns = [exclude];
+      }
+    }
+    patterns ??= [];
+
     if (yamlFile?.include) {
       const newPath = path.resolve(yamlPath, yamlFile.include);
       if (fs.existsSync(newPath)) {
         return [
           ...IgnoredFiles.getIgnoredPatterns(newPath),
-          ...ignoredFiles,
+          ...patterns,
         ];
       }
     }
-    return ignoredFiles;
+    return patterns;
   }
 
   /**

@@ -17141,19 +17141,29 @@ class IgnoredFiles {
         }
     }
     static getIgnoredPatterns(yamlPath) {
-        var _a, _b;
+        var _a;
         const yamlFile = yaml.load(fs.readFileSync(yamlPath, 'utf8'));
-        const ignoredFiles = (_b = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude) !== null && _b !== void 0 ? _b : [];
+        const exclude = (_a = yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.analyzer) === null || _a === void 0 ? void 0 : _a.exclude;
+        let patterns;
+        if (exclude) {
+            if (Array.isArray(exclude)) {
+                patterns = exclude;
+            }
+            else if (typeof exclude === 'string') {
+                patterns = [exclude];
+            }
+        }
+        patterns !== null && patterns !== void 0 ? patterns : (patterns = []);
         if (yamlFile === null || yamlFile === void 0 ? void 0 : yamlFile.include) {
             const newPath = path.resolve(yamlPath, yamlFile.include);
             if (fs.existsSync(newPath)) {
                 return [
                     ...IgnoredFiles.getIgnoredPatterns(newPath),
-                    ...ignoredFiles,
+                    ...patterns,
                 ];
             }
         }
-        return ignoredFiles;
+        return patterns;
     }
     /**
      * Whether a file is ignored
