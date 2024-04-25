@@ -48,7 +48,7 @@ No output.
 
 ## Result
 
-It will fail the checks on your Pull Requests if any issue is found: 
+It will fail the checks on your Pull Requests if any issue is found:
 
 ![failed-workflow](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/failed-workflow.png)
 
@@ -56,13 +56,9 @@ It will leave a comment explaining why it failed and what issues it found:
 
 ![comment](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/comment.png)
 
-
 In the code change, it will display errors and warnings where the issues are found:
 
 ![changes-warnings-errors](https://github.com/ValentinVignal/action-dart-analyze/blob/main/doc/images/changes-warnings-errors.png)
-
-
-
 
 ## Example usage
 
@@ -74,13 +70,13 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint flutter code
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-    - run: flutter pub get
-    - name: Analyze Flutter
-      uses: ValentinVignal/action-dart-analyze@v0.15
-      with:
-        fail-on: 'warning'
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+      - run: flutter pub get
+      - name: Analyze Flutter
+        uses: ValentinVignal/action-dart-analyze@v0.17
+        with:
+          fail-on: "warning"
 ```
