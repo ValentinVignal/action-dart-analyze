@@ -3,7 +3,7 @@
 
 # action-dart-analyze
 
-This action analyzes dart code by running `dart analyze` and `dart format`.
+This action analyzes the modified lines dart code of the PR by running `dart analyze` and `dart format`.
 
 ## How to use it
 
@@ -80,3 +80,7 @@ jobs:
         with:
           fail-on: "warning"
 ```
+
+## Using the `GITHUB_TOKEN` in a workflow
+
+In order to write comments, your `GITHUB_TOKEN` might need the `pull_request: write` permission.
