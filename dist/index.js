@@ -39425,27 +39425,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.actionOptions = exports.ActionOptions = void 0;
-const core = __importStar(__nccwpck_require__(7484));
 const path = __importStar(__nccwpck_require__(6928));
 const FailOn_1 = __nccwpck_require__(1908);
+const getInput_1 = __nccwpck_require__(4561);
 /**
  * Contains all the options of the action
  */
 class ActionOptions {
     constructor() {
         var _a;
-        this.failOn = FailOn_1.FailOn.fromInput(core.getInput('fail-on') || 'error');
-        this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = core.getInput('working-directory')) !== null && _a !== void 0 ? _a : './');
-        this.token = core.getInput('token', { required: true });
-        this.checkRenamedFiles = core.getInput('check-renamed-files') === 'true';
-        this.emojis = (core.getInput('emojis') || 'true') === 'true';
-        this.format = (core.getInput('format') || 'true') === 'true';
+        this.failOn = FailOn_1.FailOn.fromInput((0, getInput_1.getInput)('fail-on') || 'error');
+        this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = (0, getInput_1.getInput)('working-directory')) !== null && _a !== void 0 ? _a : './');
+        this.token = (0, getInput_1.getInput)('token', { required: true });
+        this.checkRenamedFiles = (0, getInput_1.getInput)('check-renamed-files') === 'true';
+        this.emojis = ((0, getInput_1.getInput)('emojis') || 'true') === 'true';
+        this.format = ((0, getInput_1.getInput)('format') || 'true') === 'true';
         try {
-            this.lineLength = parseInt(core.getInput('line-length'));
+            this.lineLength = parseInt((0, getInput_1.getInput)('line-length'));
         }
         catch (_) {
             this.lineLength = null;
         }
+        console.log('hasInputs', !!this.token, this.failOn, this.workingDirectory, this.checkRenamedFiles, this.emojis, this.format, this.lineLength);
     }
 }
 exports.ActionOptions = ActionOptions;
@@ -39496,9 +39497,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.comment = void 0;
-const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const utils_1 = __nccwpck_require__(8006);
+const getInput_1 = __nccwpck_require__(4561);
 function comment(params) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -39506,7 +39507,7 @@ function comment(params) {
             // Can only comment on Pull Requests
             return;
         }
-        const octokit = github.getOctokit(core.getInput('token', { required: true }));
+        const octokit = github.getOctokit((0, getInput_1.getInput)('token', { required: true }));
         // Create the comment
         try {
             const comment = yield octokit.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: utils_1.context.payload.pull_request.number, body: params.message }));
@@ -39733,6 +39734,7 @@ const github = __importStar(__nccwpck_require__(3228));
 const utils_1 = __nccwpck_require__(8006);
 const path_1 = __importDefault(__nccwpck_require__(6928));
 const ActionOptions_1 = __nccwpck_require__(8165);
+const getInput_1 = __nccwpck_require__(4561);
 /**
  * Modified lines chunk of a file.
  */
@@ -39905,7 +39907,7 @@ class ModifiedFiles {
                         'Please submit an issue on this action\'s GitHub repo if you believe this in correct.');
             }
             /// Github client from API token
-            const client = github.getOctokit(core.getInput('token', { required: true }));
+            const client = github.getOctokit((0, getInput_1.getInput)('token', { required: true }));
             const response = yield client.repos.compareCommits({
                 base,
                 head,
@@ -39942,6 +39944,56 @@ class ModifiedFiles {
     }
 }
 exports.ModifiedFiles = ModifiedFiles;
+
+
+/***/ }),
+
+/***/ 4561:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getInput = void 0;
+const core = __importStar(__nccwpck_require__(7484));
+/**
+ *
+ * Used to get the input from the action. Using the action from the market place
+ * with set environment variables like `INPUT_FAIL-ON`, but using the shell
+ * script will set environment variable like `INPUT_FAIL_ON`. This function
+ * returns the value of the input, no matter how it was set.
+ */
+const getInput = (name, options) => {
+    const value = core.getInput(name, options);
+    if (value || !name.includes('-')) {
+        return value;
+    }
+    return core.getInput(name.replace(/-/g, '_'), options);
+};
+exports.getInput = getInput;
 
 
 /***/ }),

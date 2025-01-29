@@ -4,6 +4,7 @@ import { context } from '@actions/github/lib/utils';
 import path from 'path';
 import { actionOptions } from './ActionOptions';
 import type { EventName } from '../Actions/Github/EventName';
+import { getInput } from './getInput';
 
 interface FileLinesInterface {
   start: number;
@@ -219,7 +220,7 @@ export class ModifiedFiles {
     }
 
     /// Github client from API token
-    const client = github.getOctokit(core.getInput('token', { required: true }));
+    const client = github.getOctokit(getInput('token', { required: true }));
 
     const response = await client.repos.compareCommits({
       base,
