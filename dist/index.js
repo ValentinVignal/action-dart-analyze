@@ -39436,7 +39436,7 @@ class ActionOptions {
         var _a;
         this.failOn = FailOn_1.FailOn.fromInput(core.getInput('fail-on') || 'error');
         this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = core.getInput('working-directory')) !== null && _a !== void 0 ? _a : './');
-        this.token = core.getInput('token');
+        this.token = core.getInput('token', { required: true });
         this.checkRenamedFiles = core.getInput('check-renamed-files') === 'true';
         this.emojis = (core.getInput('emojis') || 'true') === 'true';
         this.format = (core.getInput('format') || 'true') === 'true';
@@ -39905,7 +39905,7 @@ class ModifiedFiles {
                         'Please submit an issue on this action\'s GitHub repo if you believe this in correct.');
             }
             /// Github client from API token
-            const client = github.getOctokit(core.getInput('token'));
+            const client = github.getOctokit(core.getInput('token', { required: true }));
             const response = yield client.repos.compareCommits({
                 base,
                 head,

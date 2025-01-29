@@ -16,7 +16,8 @@ export class ActionOptions {
   constructor() {
     this.failOn = FailOn.fromInput(core.getInput('fail-on') || 'error');
     this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, core.getInput('working-directory') ?? './');
-    this.token = core.getInput('token');
+    this.token = core.getInput('token', { required: true });
+    console.log('hasToken', !!this.token);
     this.checkRenamedFiles = core.getInput('check-renamed-files') === 'true';
     this.emojis = (core.getInput('emojis') || 'true') === 'true';
     this.format = (core.getInput('format') || 'true') === 'true';
