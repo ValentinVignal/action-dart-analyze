@@ -39434,14 +39434,14 @@ const getInput_1 = __nccwpck_require__(4561);
 class ActionOptions {
     constructor() {
         var _a;
-        this.failOn = FailOn_1.FailOn.fromInput((0, getInput_1.getInput)('fail-on') || 'error');
-        this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = (0, getInput_1.getInput)('working-directory')) !== null && _a !== void 0 ? _a : './');
-        this.token = (0, getInput_1.getInput)('token', { required: true });
-        this.checkRenamedFiles = (0, getInput_1.getInput)('check-renamed-files') === 'true';
-        this.emojis = ((0, getInput_1.getInput)('emojis') || 'true') === 'true';
-        this.format = ((0, getInput_1.getInput)('format') || 'true') === 'true';
+        this.failOn = FailOn_1.FailOn.fromInput((0, getInput_1.getInputSafe)('fail-on') || 'error');
+        this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = (0, getInput_1.getInputSafe)('working-directory')) !== null && _a !== void 0 ? _a : './');
+        this.token = (0, getInput_1.getInputSafe)('token', { required: true });
+        this.checkRenamedFiles = (0, getInput_1.getInputSafe)('check-renamed-files') === 'true';
+        this.emojis = ((0, getInput_1.getInputSafe)('emojis') || 'true') === 'true';
+        this.format = ((0, getInput_1.getInputSafe)('format') || 'true') === 'true';
         try {
-            this.lineLength = parseInt((0, getInput_1.getInput)('line-length'));
+            this.lineLength = parseInt((0, getInput_1.getInputSafe)('line-length'));
         }
         catch (_) {
             this.lineLength = null;
@@ -39507,7 +39507,7 @@ function comment(params) {
             // Can only comment on Pull Requests
             return;
         }
-        const octokit = github.getOctokit((0, getInput_1.getInput)('token', { required: true }));
+        const octokit = github.getOctokit((0, getInput_1.getInputSafe)('token', { required: true }));
         // Create the comment
         try {
             const comment = yield octokit.issues.createComment(Object.assign(Object.assign({}, github.context.repo), { issue_number: utils_1.context.payload.pull_request.number, body: params.message }));
@@ -39907,7 +39907,7 @@ class ModifiedFiles {
                         'Please submit an issue on this action\'s GitHub repo if you believe this in correct.');
             }
             /// Github client from API token
-            const client = github.getOctokit((0, getInput_1.getInput)('token', { required: true }));
+            const client = github.getOctokit((0, getInput_1.getInputSafe)('token', { required: true }));
             const response = yield client.repos.compareCommits({
                 base,
                 head,
@@ -39977,7 +39977,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInput = void 0;
+exports.getInputSafe = void 0;
 const core = __importStar(__nccwpck_require__(7484));
 /**
  *
@@ -39986,14 +39986,14 @@ const core = __importStar(__nccwpck_require__(7484));
  * script will set environment variable like `INPUT_FAIL_ON`. This function
  * returns the value of the input, no matter how it was set.
  */
-const getInput = (name, options) => {
+const getInputSafe = (name, options) => {
     const value = core.getInput(name, options);
     if (value || !name.includes('-')) {
         return value;
     }
     return core.getInput(name.replace(/-/g, '_'), options);
 };
-exports.getInput = getInput;
+exports.getInputSafe = getInputSafe;
 
 
 /***/ }),

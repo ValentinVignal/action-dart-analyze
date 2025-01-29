@@ -8,7 +8,7 @@ import * as core from '@actions/core';
  * script will set environment variable like `INPUT_FAIL_ON`. This function
  * returns the value of the input, no matter how it was set.
  */
-export const getInput = (name: string, options?: core.InputOptions): string => {
+export const getInputSafe = (name: string, options?: core.InputOptions): string => {
   const value = core.getInput(name, options);
 
   if (value || !name.includes('-')) {
