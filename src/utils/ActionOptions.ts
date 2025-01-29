@@ -15,8 +15,9 @@ export class ActionOptions {
   public readonly lineLength: number | null;
   constructor() {
     this.failOn = FailOn.fromInput(getInputSafe('fail-on') || 'error');
-    this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, getInputSafe('working-directory') ?? './');
     this.token = getInputSafe('token', { required: true });
+    console.log('input1', !!this.token, this.failOn);
+    this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, getInputSafe('working-directory') ?? './');
     this.checkRenamedFiles = getInputSafe('check-renamed-files') === 'true';
     this.emojis = (getInputSafe('emojis') || 'true') === 'true';
     this.format = (getInputSafe('format') || 'true') === 'true';
