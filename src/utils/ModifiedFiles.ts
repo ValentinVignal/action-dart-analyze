@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
 import path from 'path';
-import { EventName } from '../actions/github/EventName';
 import { actionOptions } from './ActionOptions';
+import type { EventName } from '../Actions/Github/EventName';
 
 interface FileLinesInterface {
   start: number;
