@@ -39439,7 +39439,7 @@ class ActionOptions {
         this.token = core.getInput('token');
         this.checkRenamedFiles = core.getInput('check-renamed-files') === 'true';
         this.emojis = (core.getInput('emojis') || 'true') === 'true';
-        this.format = (core.getInput('format', { required: true }) || 'true') === 'true';
+        this.format = (core.getInput('format') || 'true') === 'true';
         try {
             this.lineLength = parseInt(core.getInput('line-length'));
         }
