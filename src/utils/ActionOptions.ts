@@ -14,14 +14,14 @@ export class ActionOptions {
   public readonly format: boolean;
   public readonly lineLength: number | null;
   constructor() {
-    this.failOn = FailOn.fromInput(core.getInput('fail-on', { required: true }));
-    this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, core.getInput('working-directory', { required: true }));
-    this.token = core.getInput('token', { required: true });
-    this.checkRenamedFiles = core.getInput('check-renamed-files', { required: true }) === 'true';
-    this.emojis = core.getInput('emojis', { required: true }) === 'true';
-    this.format = core.getInput('format', { required: true }) === 'true';
+    this.failOn = FailOn.fromInput(core.getInput('fail-on') || 'error');
+    this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE!, core.getInput('working-directory') ?? './');
+    this.token = core.getInput('token');
+    this.checkRenamedFiles = core.getInput('check-renamed-files') === 'true';
+    this.emojis = (core.getInput('emojis') || 'true') === 'true';
+    this.format = (core.getInput('format', { required: true }) || 'true') === 'true';
     try {
-      this.lineLength = parseInt(core.getInput('line-length', { required: true }));
+      this.lineLength = parseInt(core.getInput('line-length'));
     } catch (_) {
       this.lineLength = null;
     }
