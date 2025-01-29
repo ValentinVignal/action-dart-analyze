@@ -219,7 +219,7 @@ export class ModifiedFiles {
     }
 
     /// Github client from API token
-    const client = github.getOctokit(core.getInput('token', { required: true }));
+    const client = github.getOctokit(core.getInput('token'));
 
     const response = await client.repos.compareCommits({
       base,

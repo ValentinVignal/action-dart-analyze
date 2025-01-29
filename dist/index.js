@@ -39905,7 +39905,7 @@ class ModifiedFiles {
                         'Please submit an issue on this action\'s GitHub repo if you believe this in correct.');
             }
             /// Github client from API token
-            const client = github.getOctokit(core.getInput('token', { required: true }));
+            const client = github.getOctokit(core.getInput('token'));
             const response = yield client.repos.compareCommits({
                 base,
                 head,
