@@ -84,3 +84,42 @@ jobs:
 ## Using the `GITHUB_TOKEN` in a workflow
 
 In order to write comments, your `GITHUB_TOKEN` might need the `pull_request: write` permission.
+
+## Run it yourself
+
+Alternatively, you can download and run the script `scripts/run.sh`:
+
+```shell
+Options:
+-t, --token <token>              Required authentication token.
+
+    --fail-on <value>            Set failure level (nothing, format, info, warning, error). Default: error.
+    --working-directory <path>   Set the working directory. Default: ./
+    --[no-]check-renamed-files   Enable or disable checking renamed files. Default: false.
+    --[no-]emojis                Enable or disable emojis. Default: true.
+    --[no-]format                Enable or disable formatting. Default: true.
+    --line-length <number>       Set max line length. Default: null.
+-h, --help                       Show this help message.
+```
+
+```yml
+on: [pull_request]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    name: Lint flutter code
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+      - run: flutter pub get
+      - name: Analyze Flutter
+        runs: ValentinVignal/action-dart-analyze@v0.17
+        with:
+          fail-on: "warning"
+      - run: |
+          curl https://raw.githubusercontent.com/ValentinVignal/action-dart-analyze/refs/heads/main/scripts/run.sh -o script.sh
+          bash script.sh -t ${{ github.token }} --fail-on warning
+```

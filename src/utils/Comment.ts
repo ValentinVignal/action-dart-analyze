@@ -1,6 +1,6 @@
-import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { context } from '@actions/github/lib/utils';
+import { getInputSafe } from './getInput';
 
 export type CommentReact = '+1' | '-1' | 'laugh' | 'confused' | 'heart' | 'hooray' | 'rocket' | 'eyes';
 
@@ -10,7 +10,7 @@ export async function comment(params: { message: string, reacts?: CommentReact[]
     // Can only comment on Pull Requests
     return;
   }
-  const octokit = github.getOctokit(core.getInput('token', { required: true }));
+  const octokit = github.getOctokit(getInputSafe('token', { required: true }));
 
   // Create the comment
   try {

@@ -1,3 +1,7 @@
+## NEXT
+
+- Adds `scripts/run.sh` to run this action with a bash script.
+
 ## 0.17
 
 - :arrow_up: Upgrade to node 20.
