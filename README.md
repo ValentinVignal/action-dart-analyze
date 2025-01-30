@@ -87,7 +87,8 @@ In order to write comments, your `GITHUB_TOKEN` might need the `pull_request: wr
 
 ## Run it yourself
 
-Alternatively, you can download and run the script `scripts/run.sh`:
+Alternatively, you can download and run the script `scripts/run.sh`.
+In order to run it, you will need to set-up node first
 
 ```shell
 Options:
@@ -115,10 +116,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
       - run: flutter pub get
-      - name: Analyze Flutter
-        runs: ValentinVignal/action-dart-analyze@v0.17
-        with:
-          fail-on: "warning"
+      - uses: actions/setup-node@v4 # You need to install node before running the script.
       - run: |
           curl https://raw.githubusercontent.com/ValentinVignal/action-dart-analyze/refs/heads/main/scripts/run.sh -o script.sh
           bash script.sh -t ${{ github.token }} --fail-on warning
