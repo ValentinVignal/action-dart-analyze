@@ -102,7 +102,7 @@ if [[ -z "$TOKEN" ]]; then
 fi
 
 
-curl https://raw.githubusercontent.com/ValentinVignal/action-dart-analyze/refs/heads/script/dist/index.js -o index.js
+curl https://raw.githubusercontent.com/ValentinVignal/action-dart-analyze/refs/heads/main/dist/index.js -o index.js
 
 
 # Run the Node.js script with environment variables
