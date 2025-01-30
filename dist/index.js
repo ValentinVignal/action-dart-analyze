@@ -39436,7 +39436,6 @@ class ActionOptions {
         var _a;
         this.failOn = FailOn_1.FailOn.fromInput((0, getInput_1.getInputSafe)('fail-on') || 'error');
         this.token = (0, getInput_1.getInputSafe)('token', { required: true });
-        console.log('input1', !!this.token, this.failOn);
         this.workingDirectory = path.resolve(process.env.GITHUB_WORKSPACE, (_a = (0, getInput_1.getInputSafe)('working-directory')) !== null && _a !== void 0 ? _a : './');
         this.checkRenamedFiles = (0, getInput_1.getInputSafe)('check-renamed-files') === 'true';
         this.emojis = ((0, getInput_1.getInputSafe)('emojis') || 'true') === 'true';
@@ -39447,7 +39446,6 @@ class ActionOptions {
         catch (_) {
             this.lineLength = null;
         }
-        console.log('hasInputs', !!this.token, this.failOn, this.workingDirectory, this.checkRenamedFiles, this.emojis, this.format, this.lineLength);
     }
 }
 exports.ActionOptions = ActionOptions;
