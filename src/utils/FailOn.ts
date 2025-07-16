@@ -1,13 +1,7 @@
-export enum FailOnEnum {
-  Error = 0,
-  Warning = 1,
-  Info = 2,
-  Format = 3,
-  Nothing = 4,
-}
+import { FailOnEnum } from 'dart-analyze';
 
 export class FailOn {
-  static fromInput(input: string) {
+  static fromInput(input?: string): FailOnEnum {
     switch (input) {
       case 'nothing':
         return FailOnEnum.Nothing;
@@ -18,7 +12,7 @@ export class FailOn {
       case 'warning':
         return FailOnEnum.Warning;
       default:
-        return FailOnEnum.Error;
+        return FailOnEnum.Warning;
     }
   }
 }

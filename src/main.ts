@@ -1,44 +1,23 @@
-import * as core from '@actions/core';
-import { analyze } from './analyze/analyze';
-import { format } from './format/Format';
-import { Result } from './result/Result';
-import { IgnoredFiles } from './utils/IgnoredFiles';
-import { ModifiedFiles } from './utils/ModifiedFiles';
+import { type ActionOptions, run } from 'dart-analyze';
+import { getInputSafe } from './utils/getInput';
+import { FailOn } from './utils/FailOn';
 
 /**
  * Run the action
  */
 async function main(): Promise<void> {
+  const options: ActionOptions = {
+    failOn: FailOn.fromInput(getInputSafe('fail-on')),
+    token: getInputSafe('token', { required: true }),
+    workingDirectory: getInputSafe('working-directory'),
+    checkRenamedFiles: getInputSafe('check-renamed-files') === 'true',
+    emojis: (getInputSafe('emojis') || 'true') === 'true',
+    format: (getInputSafe('format') || 'true') === 'true',
+    lineLength: parseInt(getInputSafe('line-length')) || null,
+  };
 
-  try {
-    const modifiedFiles = new ModifiedFiles();
-    await modifiedFiles.isInit;
 
-    const ignoredFiles = new IgnoredFiles();
-
-    const analyzeResult = await analyze({
-      modifiedFiles,
-      // `dart analyze` already doesn't check ignore files
-    });
-
-    const formatResult = await format({
-      modifiedFiles,
-      ignoredFiles,
-    });
-
-    const result = new Result({
-      analyze: analyzeResult,
-      format: formatResult,
-    });
-
-    if (!result.success) {
-      await result.comment();
-    }
-    result.log();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    core.setFailed(`error: ${error.message}`);
-  }
+  await run(options);
 }
 
 main();
