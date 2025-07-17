@@ -71,14 +71,12 @@ jobs:
     name: Lint flutter code
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
       - run: flutter pub get
       - name: Analyze Flutter
-        uses: ValentinVignal/action-dart-analyze@v0.17
-        with:
-          fail-on: 'warning'
+        uses: ValentinVignal/action-dart-analyze@v1.0
 ```
 
 ## Using the `GITHUB_TOKEN` in a workflow
