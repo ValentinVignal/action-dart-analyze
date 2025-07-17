@@ -16,7 +16,7 @@ usage() {
     echo "Options:"
     echo "-t, --token <token>              Required authentication token."
     echo ""
-    echo "    --fail-on <value>            Set failure level (nothing, format, info, warning, error). Default: error."
+    echo "    --fail-on <value>            Set failure level (nothing, format, info, warning, error). Default: warning."
     echo "    --working-directory <path>   Set the working directory. Default: ./"
     echo "    --[no-]check-renamed-files   Enable or disable checking renamed files. Default: false."
     echo "    --[no-]emojis                Enable or disable emojis. Default: true."
