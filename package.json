@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "build": "ncc build src/main.ts --license licenses.txt",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "ci": "npm run check-format && npm run test"
   },
   "repository": {
     "type": "git",
@@ -29,17 +32,11 @@
     "@vercel/ncc": "^0.38.0",
     "eslint": "^8.17.0",
     "jest": "^28.1.1",
+    "prettier": "^3.6.2",
     "ts-jest": "^28.0.4",
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0",
-    "@types/js-yaml": "^4.0.5",
-    "@types/minimatch": "^3.0.4",
-    "js-yaml": "^4.1.0",
-    "minimatch": "^3.0.4",
-    "path": "^0.12.7"
+    "dart-analyze": "^0.1.2"
   }
 }

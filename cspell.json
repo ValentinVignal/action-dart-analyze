@@ -3,7 +3,8 @@
     "dist/**", // Those are compiled files.
     "package.json",
     "package-lock.json",
-    ".eslintrc.js"
+    ".eslintrc.js",
+    ".vscode/settings.json"
   ],
   "words": [
     "bangbang",

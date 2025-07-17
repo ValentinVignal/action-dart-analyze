@@ -1,6 +1,7 @@
 ## NEXT
 
 - Adds `scripts/run.sh` to run this action with a bash script.
+- **BREAKING**: `fail-on` now defaults to `'warning'`.
 
 ## 0.17
 

@@ -19,7 +19,7 @@ Create a `.yml` file in `./github/workflows/` in your project.
     - `'format'`: Fails on everything, including bad formatting.
     - `'nothing'`: Fails on nothing.
   - Optional.
-  - Default: `'error'`.
+  - Default: `'warning'`.
 - `working-directory`: The working directory.
   - Optional.
   - Default: `'./'`.
@@ -78,7 +78,7 @@ jobs:
       - name: Analyze Flutter
         uses: ValentinVignal/action-dart-analyze@v0.17
         with:
-          fail-on: "warning"
+          fail-on: 'warning'
 ```
 
 ## Using the `GITHUB_TOKEN` in a workflow
