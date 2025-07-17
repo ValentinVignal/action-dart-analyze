@@ -16,7 +16,6 @@ async function main(): Promise<void> {
     lineLength: parseInt(getInputSafe('line-length')) || null,
   };
 
-
   await run(options);
 }
 

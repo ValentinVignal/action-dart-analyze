@@ -17,7 +17,6 @@ describe('getInput', () => {
       expect(value).toBe('');
     });
 
-
     it('should return the value set by the bash script', () => {
       process.env.INPUT_FAIL_ON = 'warning';
       const value = getInputSafe('fail-on');
@@ -29,7 +28,6 @@ describe('getInput', () => {
       const value = getInputSafe('fail-on');
       expect(value).toBe('warning');
     });
-
   });
 
   describe('without "-" in the name', () => {
