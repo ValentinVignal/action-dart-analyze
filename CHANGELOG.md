@@ -1,3 +1,8 @@
+## NEXT
+
+- Makes the action update the existing comment instead of creating new ones.
+- Fix a bug where the analyzer and formatter where not run.
+
 ## 1.0
 
 - Adds `scripts/run.sh` to run this action with a bash script.

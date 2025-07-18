@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/gh/ValentinVignal/action-dart-analyze/branch/main/graph/badge.svg?token=XESGUDU3E6)](https://codecov.io/gh/ValentinVignal/action-dart-analyze)
+[![codecov dart-analyze](https://codecov.io/gh/ValentinVignal/dart-analyze/graph/badge.svg?token=Xt2QG1eluv)](https://codecov.io/gh/ValentinVignal/dart-analyze)
 [![wakatime](https://wakatime.com/badge/github/ValentinVignal/action-dart-analyze.svg)](https://wakatime.com/badge/github/ValentinVignal/action-dart-analyze)
 
 # action-dart-analyze
