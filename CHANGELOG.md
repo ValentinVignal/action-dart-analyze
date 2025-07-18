@@ -1,4 +1,4 @@
-## NEXT
+## 1.1
 
 - Makes the action update the existing comment instead of creating new ones.
 - Fix a bug where the analyzer and formatter where not run.
