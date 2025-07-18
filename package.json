@@ -37,6 +37,6 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "dart-analyze": "^0.1.2"
+    "dart-analyze": "^0.3.1"
   }
 }

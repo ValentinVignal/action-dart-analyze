@@ -29937,106 +29937,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const dart_analyze_1 = __nccwpck_require__(9258);
-const getInput_1 = __nccwpck_require__(4561);
-const FailOn_1 = __nccwpck_require__(1908);
+const dart_analyze_1 = __nccwpck_require__(9756);
 /**
- * Run the action
+ * Run the action.
  */
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const options = {
-            failOn: FailOn_1.FailOn.fromInput((0, getInput_1.getInputSafe)('fail-on')),
-            token: (0, getInput_1.getInputSafe)('token', { required: true }),
-            workingDirectory: (0, getInput_1.getInputSafe)('working-directory'),
-            checkRenamedFiles: (0, getInput_1.getInputSafe)('check-renamed-files') === 'true',
-            emojis: ((0, getInput_1.getInputSafe)('emojis') || 'true') === 'true',
-            format: ((0, getInput_1.getInputSafe)('format') || 'true') === 'true',
-            lineLength: parseInt((0, getInput_1.getInputSafe)('line-length')) || null,
-        };
-        yield (0, dart_analyze_1.run)(options);
+        yield (0, dart_analyze_1.run)();
     });
 }
 main();
-
-
-/***/ }),
-
-/***/ 1908:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FailOn = void 0;
-const dart_analyze_1 = __nccwpck_require__(9258);
-class FailOn {
-    static fromInput(input) {
-        switch (input) {
-            case 'nothing':
-                return dart_analyze_1.FailOnEnum.Nothing;
-            case 'format':
-                return dart_analyze_1.FailOnEnum.Format;
-            case 'info':
-                return dart_analyze_1.FailOnEnum.Info;
-            case 'warning':
-                return dart_analyze_1.FailOnEnum.Warning;
-            default:
-                return dart_analyze_1.FailOnEnum.Warning;
-        }
-    }
-}
-exports.FailOn = FailOn;
-
-
-/***/ }),
-
-/***/ 4561:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputSafe = void 0;
-const core = __importStar(__nccwpck_require__(7484));
-/**
- *
- * Used to get the input from the action. Using the action from the market place
- * with set environment variables like `INPUT_FAIL-ON`, but using the shell
- * script will set environment variable like `INPUT_FAIL_ON`. This function
- * returns the value of the input, no matter how it was set.
- */
-const getInputSafe = (name, options) => {
-    const value = core.getInput(name, options);
-    if (value || !name.includes('-')) {
-        return value;
-    }
-    return core.getInput(name.replace(/-/g, '_'), options);
-};
-exports.getInputSafe = getInputSafe;
 
 
 /***/ }),
@@ -31914,7 +31824,7 @@ module.exports = parseParams
 
 /***/ }),
 
-/***/ 9258:
+/***/ 9756:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -31965,13 +31875,11 @@ class ModifiedFile {
      * The file name from the root directory (`'lib/src/...'`).
      */
     name;
-    deletions;
     additions;
     constructor(file, actionOptions) {
         this.actionOptions = actionOptions;
         this.name = file.filename;
         this.additions = [];
-        this.deletions = [];
         this.parsePatch(file.patch);
     }
     /**
@@ -31987,7 +31895,6 @@ class ModifiedFile {
                 // patch is usually like " -6,7 +6,8"
                 try {
                     const hasAddition = patch.includes('+');
-                    const hasDeletion = patch.includes('-');
                     if (hasAddition) {
                         const lines = patch
                             .match(/\+.*/)[0]
@@ -31996,18 +31903,6 @@ class ModifiedFile {
                             .split(',')
                             .map((num) => parseInt(num));
                         this.additions.push(new FileLines({
-                            start: lines[0],
-                            end: lines[0] + lines[1],
-                        }));
-                    }
-                    if (hasDeletion) {
-                        const lines = patch
-                            .split('+')[0]
-                            .trim()
-                            .slice(1)
-                            .split(',')
-                            .map((num) => parseInt(num));
-                        this.deletions.push(new FileLines({
                             start: lines[0],
                             end: lines[0] + lines[1],
                         }));
@@ -32073,9 +31968,16 @@ class ModifiedFiles {
     async init() {
         const files = await this.getGithubFiles();
         for (const file of files) {
-            this.files.set(external_path_.join(process.env.GITHUB_WORKSPACE, file.filename), new ModifiedFile(file, this.actionOptions));
             const modifiedFile = new ModifiedFile(file, this.actionOptions);
-            this.files.set(modifiedFile.name, modifiedFile);
+            const githubWorkspace = process.env.GITHUB_WORKSPACE;
+            const paths = [file.filename, external_path_.join(githubWorkspace, file.filename)];
+            const githubActionWorkspaceRoot = '/home/runner/work/';
+            if (githubWorkspace.startsWith(githubActionWorkspaceRoot)) {
+                paths.push(external_path_.join(githubWorkspace.replace(githubActionWorkspaceRoot, '/__w/'), file.filename));
+            }
+            for (const filePath of paths) {
+                this.files.set(filePath, modifiedFile);
+            }
         }
         this._resolveInit(true);
     }
@@ -32139,6 +32041,27 @@ class ModifiedFiles {
 }
 //# sourceMappingURL=ModifiedFiles.js.map
 ;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/utils/FailOn.js
+class FailOn {
+    /**
+     * Create a {@link FailOnEnum} from a string input.
+     *
+     * Defaults is {@link FailOnEnum.Warning}.
+     */
+    static fromInput(input) {
+        switch (input) {
+            case 'nothing':
+                return FailOnEnum.Nothing;
+            case 'format':
+                return FailOnEnum.Format;
+            case 'info':
+                return FailOnEnum.Info;
+            case 'warning':
+                return FailOnEnum.Warning;
+            default:
+                return FailOnEnum.Warning;
+        }
+    }
+}
 /**
  * Enum representing the different fail conditions for the action.
  */
@@ -38510,7 +38433,7 @@ class FormatResult {
     }
 }
 //# sourceMappingURL=FormatResult.js.map
-;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/format/Format.js
+;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/format/format.js
 
 
 
@@ -38573,11 +38496,20 @@ async function format(params) {
         files: fileNotFormatted,
     });
 }
-//# sourceMappingURL=Format.js.map
-;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/utils/Comment.js
+//# sourceMappingURL=format.js.map
+;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/utils/comment.js
 
 
-async function comment(params, actionOptions) {
+/**
+ * Post a comment on the pull request with the given message.
+ *
+ * Attempts the update an existing comment if it finds one, otherwise creates a new comment.
+ *
+ * If {@link message} is not provided, it will
+ * - do nothing if there is no existing comment,
+ * - or update the existing comment with a resolved message.
+ */
+async function comment({ message, }, actionOptions) {
     if (!github.context.payload.pull_request) {
         // Can only comment on Pull Requests
         return;
@@ -38593,7 +38525,7 @@ async function comment(params, actionOptions) {
         // Find existing comment from this specific action (using a unique identifier)
         const COMMENT_IDENTIFIER = '<!-- dart-analyze -->';
         const existingComment = comments.data.find((comment) => comment.body?.includes(COMMENT_IDENTIFIER));
-        const messageWithIdentifier = `${COMMENT_IDENTIFIER}\n${params.message}`;
+        const messageWithIdentifier = `${COMMENT_IDENTIFIER}\n${message ?? successMessage(actionOptions)}`;
         if (existingComment) {
             // Update existing comment
             await octokit.rest.issues.updateComment({
@@ -38602,7 +38534,7 @@ async function comment(params, actionOptions) {
                 body: messageWithIdentifier,
             });
         }
-        else {
+        else if (message) {
             // Create new comment
             await octokit.rest.issues.createComment({
                 ...github.context.repo,
@@ -38612,10 +38544,14 @@ async function comment(params, actionOptions) {
         }
     }
     catch (error) {
-        console.log(`Couldn't comment "${params.message}"`);
+        console.log(`Couldn't comment "${message}"`);
     }
 }
-//# sourceMappingURL=Comment.js.map
+const successMessage = (actionOptions) => {
+    const icon = actionOptions.emojis ? ':white_check_mark: ' : '';
+    return `**Dart analyze** completed successfully\n${icon}All issues have been resolved.`;
+};
+//# sourceMappingURL=comment.js.map
 ;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/result/Result.js
 
 
@@ -38652,15 +38588,20 @@ class Result {
      */
     async comment() {
         const messages = [this.issueCountMessage({ emojis: true })];
-        const analyzeBody = this.analyze.commentBody;
-        if (analyzeBody) {
-            messages.push(analyzeBody);
+        if (this.success) {
+            await comment({}, this.actionOptions);
         }
-        const formatBody = this.format.commentBody;
-        if (formatBody) {
-            messages.push(formatBody);
+        else {
+            const analyzeBody = this.analyze.commentBody;
+            if (analyzeBody) {
+                messages.push(analyzeBody);
+            }
+            const formatBody = this.format.commentBody;
+            if (formatBody) {
+                messages.push(formatBody);
+            }
+            await comment({ message: messages.join('\n---\n') }, this.actionOptions);
         }
-        await comment({ message: messages.join('\n---\n') }, this.actionOptions);
     }
     /**
      * Summary of the analysis put in the comment and in the console
@@ -38780,7 +38721,45 @@ class Result {
     }
 }
 //# sourceMappingURL=Result.js.map
+;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/utils/getInput.js
+/**
+ *  Get the input as a string from the environment variables.
+ */
+const getInputString = (name) => {
+    const names = [name, name.replace(/-/g, '_')].map((name) => `INPUT_${name.toUpperCase()}`);
+    for (const envName of names) {
+        const value = process.env[envName];
+        if (value !== undefined) {
+            return value.trim();
+        }
+    }
+};
+/**
+ * Get the input as a number from the environment variables.
+ */
+const getInputNumber = (name) => {
+    const value = getInputString(name);
+    if (value === undefined) {
+        return undefined;
+    }
+    return parseInt(value);
+};
+/**
+ * Get the input as a multiline string from the environment variables.
+ */
+const getInputMultilineString = (name) => {
+    const value = getInputString(name);
+    if (value === undefined) {
+        return undefined;
+    }
+    return value
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+};
+//# sourceMappingURL=getInput.js.map
 ;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/utils/ActionOptions.js
+
 
 
 /**
@@ -38789,17 +38768,24 @@ class Result {
  * @param options
  * @returns
  */
-const applyDefaults = (options) => ({
-    failOn: options.failOn ?? FailOnEnum.Warning,
-    workingDirectory: external_path_.resolve(process.env.GITHUB_WORKSPACE, options.workingDirectory ?? './'),
-    token: options.token,
-    checkRenamedFiles: options.checkRenamedFiles ?? false,
-    emojis: options.emojis ?? true,
-    format: options.format ?? true,
-    lineLength: options.lineLength,
-    analyzerLines: options.analyzerLines,
-    formatLines: options.formatLines,
-});
+const applyDefaults = (options) => {
+    const token = options?.token || getInputString('token');
+    if (!token) {
+        throw new Error('The token is required');
+    }
+    return {
+        failOn: options?.failOn ?? FailOn.fromInput(getInputString('fail-on')),
+        workingDirectory: external_path_.resolve(process.env.GITHUB_WORKSPACE, options?.workingDirectory ?? getInputString('working-directory') ?? './'),
+        token,
+        checkRenamedFiles: options?.checkRenamedFiles ??
+            getInputString('check-renamed-files') === 'true',
+        emojis: options?.emojis ?? (getInputString('emojis') || 'true') === 'true',
+        format: options?.format ?? (getInputString('format') || 'true') === 'true',
+        lineLength: options?.lineLength ?? getInputNumber('line-length'),
+        analyzerLines: options?.analyzerLines ?? getInputMultilineString('analyzer-lines'),
+        formatLines: options?.formatLines ?? getInputMultilineString('format-lines'),
+    };
+};
 //# sourceMappingURL=ActionOptions.js.map
 ;// CONCATENATED MODULE: ./node_modules/dart-analyze/dist/action.js
 
@@ -38832,9 +38818,7 @@ async function run(options) {
             analyze: analyzeResult,
             format: formatResult,
         }, optionsWithDefaults);
-        if (!result.success) {
-            await result.comment();
-        }
+        await result.comment();
         result.log();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
