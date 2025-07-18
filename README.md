@@ -77,7 +77,7 @@ jobs:
         uses: subosito/flutter-action@v2
       - run: flutter pub get
       - name: Analyze Flutter
-        uses: ValentinVignal/action-dart-analyze@v1.0
+        uses: ValentinVignal/action-dart-analyze@v1.1
 ```
 
 ## Using the `GITHUB_TOKEN` in a workflow
