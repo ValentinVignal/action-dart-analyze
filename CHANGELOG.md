@@ -1,3 +1,7 @@
+## 2.2
+
+- Upgrade to node 24.
+
 ## 2.1
 
 - Adds `comment-on-success` input to allow posting comments even when there are no failing issues found. Defaults to `true`.
