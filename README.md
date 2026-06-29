@@ -76,12 +76,12 @@ jobs:
     name: Lint flutter code
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
       - run: flutter pub get
       - name: Analyze Flutter
-        uses: ValentinVignal/action-dart-analyze@v2.0
+        uses: ValentinVignal/action-dart-analyze@v2.2
 ```
 
 ## Using the `GITHUB_TOKEN` in a workflow
@@ -116,11 +116,11 @@ jobs:
     name: Lint flutter code
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.2
       - run: flutter pub get
-      - uses: actions/setup-node@v4 # You need to install node before running the script.
+      - uses: actions/setup-node@v6 # You need to install node before running the script.
       - run: |
           curl https://raw.githubusercontent.com/ValentinVignal/action-dart-analyze/refs/heads/main/scripts/run.sh -o script.sh
           bash script.sh -t ${{ github.token }} --fail-on warning
